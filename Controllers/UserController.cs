@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using OrganizerApi.models;
 using OrganizerApi.models.DTOs;
+using OrganizerApi.Service;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -9,61 +9,35 @@ namespace OrganizerApi.Controllers
 {
     [Route("/user")]
     [ApiController]
-    public class ValuesController : ControllerBase
+    public class UserController : ControllerBase
     {
-        // GET: api/<ValuesController>
-        //[HttpGet]
-        //public User GetUser()
-        //{
-        //    var demoUser = new User
-        //    {
-        //        Id = 1,
-        //        Name = "John",
-        //        EmailAddress = "john@email.com",
-        //        Password = "password"
-        //    };
 
-        //    return demoUser;
-        //}
+        private readonly IUserService _userService;
 
-        // GET api/<ValuesController>/5
-        [HttpGet("{id}")]
-        public User? GetSepcificUser(int id)
+        public UserController(IUserService userService)
         {
-
-            
-            if (id == 1)
-            {
-                var demoUser = new User
-                {
-                    Id = 1,
-                    Name = "John",
-                    EmailAddress = "deo@email.com",
-                    Password = "password"
-                };
-                return demoUser;
-            }
-            else
-            {
-                return null;
-            }
-
+            _userService = userService;
         }
 
-        // POST api/<ValuesController>
-        [HttpPost]
-        public IActionResult CreateNewUser([FromBody] NewUserRequest newUserRequest)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetSpecificUser(string id)
         {
-            //try
-            //{
-             
+            var user = await _userService.GetUser(id);
 
-            //    return Ok();
-            //}catch (Exception ex)
-            //{
-            //    return BadRequest($"user creating failed: {ex.Message}");
-            //}
-            
+            if (user == null)
+            {
+                return NotFound(); // return 404 if user not found
+            }
+
+            return Ok(user);
+        }
+
+        [HttpPost("new")]
+        public async Task<IActionResult?> CreateNewUserAsync([FromBody] NewUserRequest newUserRequest)
+        {
+            var newUser = await _userService.CreateNewUserAsync(newUserRequest);
+
+            return Ok(newUser);
         }
 
     }
