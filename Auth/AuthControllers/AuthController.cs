@@ -23,7 +23,7 @@ namespace OrganizerApi.Auth.AuthControllers
             try
             {
                 _authService.Register(loginReq);
-                return Ok();
+                return Ok("successfully registered");
             }
             catch (Exception ex)
             {
@@ -31,18 +31,19 @@ namespace OrganizerApi.Auth.AuthControllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
         [HttpPost("login")]
         public IActionResult Login(LoginRequest loginReq)
         {
-            try
+            var userExists = _authService.Login(loginReq);
+            if (userExists == null)
             {
-                _authService.Login(loginReq);
-                return Ok();
+                return Unauthorized();
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                var token = _authService.CreateJwtToken(userExists.Result);
+                return Ok(token);
             }
         }
     }

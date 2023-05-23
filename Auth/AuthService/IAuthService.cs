@@ -7,7 +7,7 @@ namespace OrganizerApi.Auth.AuthService
     {
 
         void Register(LoginRequest loginReq);
-        string CreateToken(AppUser user);
-        void Login(LoginRequest loginReq);
+        string CreateJwtToken(AppUser user);
+        Task<AppUser> Login(LoginRequest loginReq);
     }
 }

@@ -14,46 +14,63 @@ namespace OrganizerApi.Auth.AuthService
     public class AuthService : IAuthService
     {
 
+        private readonly IConfiguration _configuration;
         private readonly ICalendarService _calendarService;
         private readonly IUserRepository _userRepository;
-        public AuthService(ICalendarService calendarService, IUserRepository userRepository)
+        private readonly string _secretKey = "2e7b57ad2498e34f0b6405bb29c9959fcf63f2f89dc13e27a4dd524d9c16d9e2";
+        public AuthService(ICalendarService calendarService, IUserRepository userRepository, IConfiguration config)
         {
             _calendarService = calendarService;
             _userRepository = userRepository;
+            _configuration = config;
         }
 
-        public string CreateToken(AppUser user)
+        public string CreateJwtToken(AppUser user)
         {
-            // Create token claims (e.g., user ID and username)
-            var claims = new List<Claim>
-            {
-            new Claim(ClaimTypes.Name, user.Name)
-            // Add additional claims as needed
+            List<Claim> claims = new List<Claim> {
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Role, "Admin"),
+                new Claim(ClaimTypes.Role, "User"),
             };
 
-            // Create token credentials and signing key
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                "2e7b57ad2498e34f0b6405bb29c9959fcf63f2f89dc13e27a4dd524d9c16d9e2"));
 
-            // Create token descriptor
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(7), // Set token expiration
-                SigningCredentials = credentials
-            };
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-            // Create token handler and generate token
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddDays(1),
+                    signingCredentials: creds
+                );
 
-            // Return the generated token as a string
-            return tokenHandler.WriteToken(token);
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
         }
 
-        public void Login(LoginRequest loginReq)
+        public async Task<AppUser> Login(LoginRequest loginReq)
         {
-            throw new NotImplementedException();
+            // find user in db by username
+            var user = await _userRepository.GetUserByUsername(loginReq.username);
+            
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+            else
+            {
+                // verify password
+                if (!BCrypt.Net.BCrypt.Verify(loginReq.password, user.Password))
+                {
+                    throw new Exception("Invalid password");
+                }
+                else
+                {
+                    return user;
+                }
+            }
+
         }
 
         public void Register(LoginRequest loginReq)
@@ -68,6 +85,7 @@ namespace OrganizerApi.Auth.AuthService
             // Example code:
             var user = new AppUser
             {
+                Id = Guid.NewGuid(),
                 Name = loginReq.username,
                 Password = hashedPassword,
                 EmailAddress = "not implemented",
