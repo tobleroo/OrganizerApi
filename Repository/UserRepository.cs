@@ -28,6 +28,17 @@ namespace OrganizerApi.Repository
             }
         }
 
+        public async Task<AppUser> GetUserByUsername(string username)
+        {
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.Name = @username")
+                .WithParameter("@username", username);
+
+            var iterator = container.GetItemQueryIterator<AppUser>(query);
+            var response = await iterator.ReadNextAsync();
+
+            return response.Resource.First();
+        }
+
         public async Task<AppUser> SaveNewUser(AppUser user)
         {
             ItemResponse<AppUser> response = await container.CreateItemAsync<AppUser>(user, new PartitionKey(user.Id.ToString()));
