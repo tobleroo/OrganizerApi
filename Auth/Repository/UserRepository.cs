@@ -1,18 +1,23 @@
 ﻿using Microsoft.Azure.Cosmos;
-using OrganizerApi.models;
+using OrganizerApi.Auth.models;
 
-namespace OrganizerApi.Repository
+namespace OrganizerApi.Auth.Repository
 {
     public class UserRepository : IUserRepository
     {
 
-        private readonly Container container;
+        private Container container;
 
         public UserRepository()
         {
+            InitializeContainerAsync().Wait();
+        }
+
+        private async Task InitializeContainerAsync()
+        {
             var conn = new DbConnection("https://localhost:8081", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
                 "Organizer", "Users");
-            container = conn.GetContainer();
+            container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
         }
 
         public async Task<AppUser> GetUser(string id)
@@ -41,13 +46,13 @@ namespace OrganizerApi.Repository
 
         public async Task<AppUser> SaveNewUser(AppUser user)
         {
-            ItemResponse<AppUser> response = await container.CreateItemAsync<AppUser>(user, new PartitionKey(user.Id.ToString()));
+            ItemResponse<AppUser> response = await container.CreateItemAsync(user, new PartitionKey(user.Id.ToString()));
             return response.Resource;
         }
 
         public async Task<AppUser> UpdateUser(AppUser user)
         {
-            ItemResponse<AppUser> response = await container.UpsertItemAsync<AppUser>(user, new PartitionKey(user.Id.ToString()));
+            ItemResponse<AppUser> response = await container.UpsertItemAsync(user, new PartitionKey(user.Id.ToString()));
             return response.Resource;
         }
 

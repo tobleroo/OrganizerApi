@@ -2,7 +2,7 @@
 using OrganizerApi.Calendar.Models;
 
 
-namespace OrganizerApi.models
+namespace OrganizerApi.Auth.models
 {
     [Serializable]
     public class AppUser

@@ -1,17 +1,18 @@
-﻿using OrganizerApi.models;
-using OrganizerApi.models.DTOs;
-using OrganizerApi.Calendar.Services;
-using OrganizerApi.Repository;
+﻿using OrganizerApi.Calendar.Services;
 using System.Net;
+using OrganizerApi.Auth.models.DTOs;
+using OrganizerApi.Auth.models;
+using OrganizerApi.Auth.Repository;
 
-namespace OrganizerApi.Service
+namespace OrganizerApi.Auth.UserService
 {
     public class UserService : IUserService
     {
         private readonly ICalendarService _calendarService;
         private readonly IUserRepository _userRepository;
 
-        public UserService(ICalendarService calService, IUserRepository userRepo) {
+        public UserService(ICalendarService calService, IUserRepository userRepo)
+        {
             _calendarService = calService;
             _userRepository = userRepo;
         }

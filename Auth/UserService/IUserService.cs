@@ -1,8 +1,8 @@
-﻿using OrganizerApi.models;
-using OrganizerApi.models.DTOs;
-using OrganizerApi.Calendar.Services;
+﻿using OrganizerApi.Calendar.Services;
+using OrganizerApi.Auth.models.DTOs;
+using OrganizerApi.Auth.models;
 
-namespace OrganizerApi.Service
+namespace OrganizerApi.Auth.UserService
 {
     public interface IUserService
     {

@@ -1,6 +1,6 @@
-﻿using OrganizerApi.models;
+﻿using OrganizerApi.Auth.models;
 
-namespace OrganizerApi.Repository
+namespace OrganizerApi.Auth.Repository
 {
     public interface IUserRepository
     {
