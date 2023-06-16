@@ -22,15 +22,41 @@ namespace OrganizerApi.Repository
             this.containerId = containerId;
         }
 
-        public Container GetContainer()
+        public async Task<Container> GetContainer()
         {
             if (container == null)
             {
                 cosmosClient = new CosmosClient(endpointUri, primaryKey);
-                database = cosmosClient.GetDatabase(databaseId);
+                database = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseId);
+                //database = cosmosClient.GetDatabase(databaseId);
+                if (database == null)
+                {
+                    await CreateDatabase();
+                    database = cosmosClient.GetDatabase(databaseId);
+                }
+
+                // Get the container reference
+                CreateUsersContainer();
                 container = database.GetContainer(containerId);
+
+                if (container == null)
+                {
+                    var containerProperties = new ContainerProperties(containerId, "id");
+                    container = await database.CreateContainerIfNotExistsAsync(containerProperties);
+                }
             }
             return container;
+        }
+
+        private async Task CreateDatabase()
+        {
+            database = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseId);
+        }
+
+        private void CreateUsersContainer()
+        {
+            var containerProperties = new ContainerProperties(containerId, "/id");
+            container = database.CreateContainerIfNotExistsAsync(containerProperties).GetAwaiter().GetResult();
         }
     }
 }

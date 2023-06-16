@@ -6,13 +6,18 @@ namespace OrganizerApi.Repository
     public class UserRepository : IUserRepository
     {
 
-        private readonly Container container;
+        private Container container;
 
         public UserRepository()
         {
+            InitializeContainerAsync().Wait();
+        }
+
+        private async Task InitializeContainerAsync()
+        {
             var conn = new DbConnection("https://localhost:8081", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
                 "Organizer", "Users");
-            container = conn.GetContainer();
+            container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
         }
 
         public async Task<AppUser> GetUser(string id)
