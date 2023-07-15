@@ -1,4 +1,4 @@
-﻿namespace OrganizerApi.Auth.models
+﻿namespace OrganizerApi.Auth.DTOs.models
 {
     public class LoginRequest
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
+using OrganizerApi.Auth.models;
 using OrganizerApi.Calendar.Models;
 using OrganizerApi.Calendar.Models.CalendarDTOs;
-using OrganizerApi.models;
 using System;
 using System.Globalization;
 

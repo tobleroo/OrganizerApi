@@ -1,12 +1,13 @@
-using OrganizerApi.Service;
+
 using OrganizerApi.Calendar.Services;
-using OrganizerApi.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using OrganizerApi.Auth.AuthService;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using OrganizerApi.Auth.UserService;
+using OrganizerApi.Auth.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 

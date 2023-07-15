@@ -1,10 +1,9 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.IdentityModel.Tokens;
 using OrganizerApi.Auth.models;
+using OrganizerApi.Auth.models.DTOs;
+using OrganizerApi.Auth.Repository;
 using OrganizerApi.Calendar.Services;
-using OrganizerApi.models;
-using OrganizerApi.Repository;
-using OrganizerApi.Service;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -73,14 +72,25 @@ namespace OrganizerApi.Auth.AuthService
 
         }
 
-        public void Register(LoginRequest loginReq)
+        public void Register(NewUserRequest newUser)
         {
+            //check that email or username doesnt already exists
+            var checkUsername = _userRepository.GetUserByUsername(newUser.Name);
+            var checkEmail = _userRepository.GetUserByEmail(newUser.EmailAddress);
+            if (checkUsername != null && checkEmail != null)
+            {
+                throw new Exception("The username and email address you provided already exist.");
+            }
+
+            if (newUser.registrationCode != "jeffkaff2000")
+            {
+                throw new Exception("not the right code!")
+            }
+
 
             // Hash the password using Bcrypt
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(loginReq.password);
-
-            // Save the username and hashed password to the database or user store
-            // Replace this with your actual implementation
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newUser.password);
+            
 
             // Example code:
             var user = new AppUser
@@ -88,7 +98,7 @@ namespace OrganizerApi.Auth.AuthService
                 Id = Guid.NewGuid(),
                 Name = loginReq.username,
                 Password = hashedPassword,
-                EmailAddress = "not implemented",
+                EmailAddress = newUser.EmailAddress,
                 Calendar = _calendarService.CreateCalendar()
             };
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OrganizerApi.Auth.models;
 using OrganizerApi.Calendar.Models;
 using OrganizerApi.Calendar.Models.CalendarDTOs;
-using OrganizerApi.models;
 
 namespace OrganizerApi.Calendar.Services
 {

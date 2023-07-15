@@ -12,5 +12,7 @@ namespace OrganizerApi.Auth.Repository
 
         Task<AppUser> UpdateUser(AppUser user);
 
+        Task<AppUser> GetUserByEmail(string email)
+
     }
 }

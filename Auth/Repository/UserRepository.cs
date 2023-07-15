@@ -56,6 +56,18 @@ namespace OrganizerApi.Auth.Repository
             return response.Resource;
         }
 
+        // get user by email
+        public async Task<AppUser> GetUserByEmail(string email)
+        {
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.EmailAddress = @email")
+                .WithParameter("@email", email);
+
+            var iterator = container.GetItemQueryIterator<AppUser>(query);
+            var response = await iterator.ReadNextAsync();
+
+            return response.Resource.First();
+        }
+
 
     }
 }
