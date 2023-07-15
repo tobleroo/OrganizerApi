@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrganizerApi.Calendar.Models.CalendarDTOs;
 using OrganizerApi.Calendar.Services;
-using OrganizerApi.models.DTOs;
-using OrganizerApi.Service;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using OrganizerApi.Calendar.Models;
+using OrganizerApi.Auth.UserService;
 
 namespace OrganizerApi.Calendar.CalendarControllers
 {

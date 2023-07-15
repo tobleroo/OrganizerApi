@@ -1,10 +1,8 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.IdentityModel.Tokens;
 using OrganizerApi.Auth.models;
+using OrganizerApi.Auth.Repository;
 using OrganizerApi.Calendar.Services;
-using OrganizerApi.models;
-using OrganizerApi.Repository;
-using OrganizerApi.Service;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;

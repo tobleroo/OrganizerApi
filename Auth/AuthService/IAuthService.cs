@@ -1,5 +1,4 @@
 ﻿using OrganizerApi.Auth.models;
-using OrganizerApi.models;
 
 namespace OrganizerApi.Auth.AuthService
 {
@@ -9,5 +8,6 @@ namespace OrganizerApi.Auth.AuthService
         void Register(LoginRequest loginReq);
         string CreateJwtToken(AppUser user);
         Task<AppUser> Login(LoginRequest loginReq);
+        
     }
 }
