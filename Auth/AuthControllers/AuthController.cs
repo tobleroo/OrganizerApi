@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OrganizerApi.Auth.AuthService;
-using OrganizerApi.Auth.models;
+using OrganizerApi.Auth.DTOs.models;
+using OrganizerApi.Auth.models.DTOs;
 
 namespace OrganizerApi.Auth.AuthControllers
 {
@@ -17,13 +18,19 @@ namespace OrganizerApi.Auth.AuthControllers
             _authService = authService;
             _logger = logger;
         }
+
         [HttpPost("register")]
-        public IActionResult Register(LoginRequest loginReq)
+        public async Task<IActionResult> Register(NewUserRequest loginReq)
         {
             try
             {
-                _authService.Register(loginReq);
-                return Ok("successfully registered");
+                var resultString = await _authService.Register(loginReq);
+                if (resultString != "user saved!") 
+                { 
+                    return BadRequest(resultString);
+                }
+
+                return Ok(resultString);
             }
             catch (Exception ex)
             {

@@ -8,10 +8,7 @@ namespace OrganizerApi.Auth.Repository
 
         private Container container;
 
-        public UserRepository()
-        {
-            InitializeContainerAsync().Wait();
-        }
+        public UserRepository() => InitializeContainerAsync().Wait();
 
         private async Task InitializeContainerAsync()
         {
@@ -68,6 +65,44 @@ namespace OrganizerApi.Auth.Repository
             return response.Resource.First();
         }
 
+        public async Task<bool> CheckIfUsernameExists(string username)
+        {
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.Name = @name")
+                .WithParameter("@name", username);
 
+            var iterator = container.GetItemQueryIterator<AppUser>(query);
+            var response = await iterator.ReadNextAsync();
+            Console.WriteLine(response.Resource == null);
+
+            return response.Resource == null;
+        }
+
+        public async Task<bool> CheckIfEmailExists(string email)
+        {
+            var query = new QueryDefinition("SELECT * FROM c WHERE c.EmailAddress = @email")
+                .WithParameter("@email", email);
+
+            var iterator = container.GetItemQueryIterator<AppUser>(query);
+            var response = await iterator.ReadNextAsync();
+
+            Console.WriteLine(response.Resource == null);
+            return response.Resource == null;
+        }
+
+        public async Task<bool> CheckEmailAndUsernameExists(string email, string username)
+        {
+
+            Console.WriteLine(email + username);
+            var query = new QueryDefinition("SELECT VALUE COUNT(1) FROM c WHERE c.Name = @username OR c.EmailAddress = @email")
+                .WithParameter("@username", username)
+                .WithParameter("@email", email);
+
+            var iterator = container.GetItemQueryIterator<int>(query);
+            var response = await iterator.ReadNextAsync();
+
+            int count = response.FirstOrDefault();
+            Console.WriteLine("Number of matching items: " + count);
+            return count > 0;
+        }
     }
 }

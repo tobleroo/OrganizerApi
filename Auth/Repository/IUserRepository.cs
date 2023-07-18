@@ -12,7 +12,13 @@ namespace OrganizerApi.Auth.Repository
 
         Task<AppUser> UpdateUser(AppUser user);
 
-        Task<AppUser> GetUserByEmail(string email)
+        Task<AppUser> GetUserByEmail(string email);
+
+        Task<bool> CheckIfUsernameExists(string username);
+
+        Task<bool> CheckIfEmailExists(string email);
+        
+        Task<bool> CheckEmailAndUsernameExists(string email, string username);
 
     }
 }

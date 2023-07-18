@@ -1,5 +1,7 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using Microsoft.IdentityModel.Tokens;
+using OrganizerApi.Auth.DTOs.models;
 using OrganizerApi.Auth.models;
 using OrganizerApi.Auth.models.DTOs;
 using OrganizerApi.Auth.Repository;
@@ -51,7 +53,7 @@ namespace OrganizerApi.Auth.AuthService
         public async Task<AppUser> Login(LoginRequest loginReq)
         {
             // find user in db by username
-            var user = await _userRepository.GetUserByUsername(loginReq.username);
+            var user = await _userRepository.GetUserByUsername(loginReq.Username);
             
             if (user == null)
             {
@@ -60,7 +62,7 @@ namespace OrganizerApi.Auth.AuthService
             else
             {
                 // verify password
-                if (!BCrypt.Net.BCrypt.Verify(loginReq.password, user.Password))
+                if (!BCrypt.Net.BCrypt.Verify(loginReq.Password, user.Password))
                 {
                     throw new Exception("Invalid password");
                 }
@@ -72,38 +74,39 @@ namespace OrganizerApi.Auth.AuthService
 
         }
 
-        public void Register(NewUserRequest newUser)
+        public async Task<string> Register(NewUserRequest newUser)
         {
             //check that email or username doesnt already exists
-            var checkUsername = _userRepository.GetUserByUsername(newUser.Name);
-            var checkEmail = _userRepository.GetUserByEmail(newUser.EmailAddress);
-            if (checkUsername != null && checkEmail != null)
+            var checkUsernameAndEmail = await _userRepository.CheckEmailAndUsernameExists(newUser.EmailAddress, newUser.Name);
+
+            if (checkUsernameAndEmail)
             {
-                throw new Exception("The username and email address you provided already exist.");
+                return "User already exists";
             }
 
             if (newUser.registrationCode != "jeffkaff2000")
             {
-                throw new Exception("not the right code!")
+                return "not right code!";
             }
 
 
             // Hash the password using Bcrypt
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newUser.password);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(newUser.Password);
             
 
             // Example code:
             var user = new AppUser
             {
                 Id = Guid.NewGuid(),
-                Name = loginReq.username,
+                Name = newUser.Name,
                 Password = hashedPassword,
                 EmailAddress = newUser.EmailAddress,
                 Calendar = _calendarService.CreateCalendar()
             };
 
 
-            _userRepository.SaveNewUser(user);
+            await _userRepository.SaveNewUser(user);
+            return "user saved!";
         }
     }
 }
