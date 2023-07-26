@@ -42,6 +42,7 @@ namespace OrganizerApi.Auth.AuthControllers
         [HttpPost("login")]
         public IActionResult Login(LoginRequest loginReq)
         {
+            Console.WriteLine("i was here" + loginReq.Username);
             var userExists = _authService.Login(loginReq);
             if (userExists == null)
             {

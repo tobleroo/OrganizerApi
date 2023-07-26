@@ -5,6 +5,7 @@ using OrganizerApi.Auth.DTOs.models;
 using OrganizerApi.Auth.models;
 using OrganizerApi.Auth.models.DTOs;
 using OrganizerApi.Auth.Repository;
+using OrganizerApi.Auth.Utils;
 using OrganizerApi.Calendar.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -77,7 +78,11 @@ namespace OrganizerApi.Auth.AuthService
         public async Task<string> Register(NewUserRequest newUser)
         {
             //check that email or username doesnt already exists
-            var checkUsernameAndEmail = await _userRepository.CheckEmailAndUsernameExists(newUser.EmailAddress, newUser.Name);
+            if(!AuthChecks.CheckValidEmail(newUser.EmailAddress))
+            {
+                return "email not valid!";
+            }
+            var checkUsernameAndEmail = await _userRepository.CheckEmailAndUsernameExists(newUser.EmailAddress.ToLower(), newUser.Name);
 
             if (checkUsernameAndEmail)
             {

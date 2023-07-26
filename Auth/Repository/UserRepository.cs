@@ -72,7 +72,6 @@ namespace OrganizerApi.Auth.Repository
 
             var iterator = container.GetItemQueryIterator<AppUser>(query);
             var response = await iterator.ReadNextAsync();
-            Console.WriteLine(response.Resource == null);
 
             return response.Resource == null;
         }
@@ -85,14 +84,12 @@ namespace OrganizerApi.Auth.Repository
             var iterator = container.GetItemQueryIterator<AppUser>(query);
             var response = await iterator.ReadNextAsync();
 
-            Console.WriteLine(response.Resource == null);
             return response.Resource == null;
         }
 
         public async Task<bool> CheckEmailAndUsernameExists(string email, string username)
         {
 
-            Console.WriteLine(email + username);
             var query = new QueryDefinition("SELECT VALUE COUNT(1) FROM c WHERE c.Name = @username OR c.EmailAddress = @email")
                 .WithParameter("@username", username)
                 .WithParameter("@email", email);
@@ -101,7 +98,6 @@ namespace OrganizerApi.Auth.Repository
             var response = await iterator.ReadNextAsync();
 
             int count = response.FirstOrDefault();
-            Console.WriteLine("Number of matching items: " + count);
             return count > 0;
         }
     }
