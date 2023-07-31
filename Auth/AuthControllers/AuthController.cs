@@ -45,12 +45,10 @@ namespace OrganizerApi.Auth.AuthControllers
             var userExists = _authService.Login(loginReq);
             if (userExists.Result == null)
             {
-                Console.WriteLine("not auth");
-                return Unauthorized();
+                return Unauthorized("not the right username or password!");
             }
             else
             {
-                Console.WriteLine("is auth");
                 var token = _authService.CreateJwtToken(userExists.Result);
                 return Ok(token);
             }

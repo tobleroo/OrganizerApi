@@ -56,10 +56,8 @@ namespace OrganizerApi.Auth.AuthService
             // find user in db by username
             var user = await _userRepository.GetUserByUsername(loginReq.Username);
 
-            Console.WriteLine("in login method");
             if (user == null)
             {
-                Console.WriteLine("user is null in login method");
                 return null;
             }
             else
