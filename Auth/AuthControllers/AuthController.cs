@@ -42,14 +42,15 @@ namespace OrganizerApi.Auth.AuthControllers
         [HttpPost("login")]
         public IActionResult Login(LoginRequest loginReq)
         {
-            Console.WriteLine("i was here" + loginReq.Username);
             var userExists = _authService.Login(loginReq);
-            if (userExists == null)
+            if (userExists.Result == null)
             {
+                Console.WriteLine("not auth");
                 return Unauthorized();
             }
             else
             {
+                Console.WriteLine("is auth");
                 var token = _authService.CreateJwtToken(userExists.Result);
                 return Ok(token);
             }

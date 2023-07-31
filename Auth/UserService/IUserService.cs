@@ -1,6 +1,7 @@
 ﻿using OrganizerApi.Calendar.Services;
 using OrganizerApi.Auth.models.DTOs;
 using OrganizerApi.Auth.models;
+using System.Security.Claims;
 
 namespace OrganizerApi.Auth.UserService
 {
@@ -8,7 +9,9 @@ namespace OrganizerApi.Auth.UserService
     {
 
         Task<AppUser> GetUser(string id);
+        Task<AppUser> GetUserByUsername(string username);
         Task<HttpResponseMessage> CreateNewUserAsync(NewUserRequest newUserRequest);
         Task<AppUser> SaveOrUpdateUserData(AppUser user);
+
     }
 }

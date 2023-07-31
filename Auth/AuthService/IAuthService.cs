@@ -10,7 +10,7 @@ namespace OrganizerApi.Auth.AuthService
 
         Task<string> Register(NewUserRequest newUser);
         string CreateJwtToken(AppUser user);
-        Task<AppUser> Login(LoginRequest loginReq);
+        Task<AppUser?> Login(LoginRequest loginReq);
         
     }
 }

@@ -67,7 +67,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseCors(MyAllowSpecificOrigins); // prova flytta runt
+app.UseCors(MyAllowSpecificOrigins); // prova flytta runt
 
 app.UseHttpsRedirection();
 

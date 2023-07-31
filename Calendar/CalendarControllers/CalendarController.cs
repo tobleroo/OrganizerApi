@@ -6,12 +6,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http.HttpResults;
 using OrganizerApi.Calendar.Models;
 using OrganizerApi.Auth.UserService;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json.Linq;
 
 namespace OrganizerApi.Calendar.CalendarControllers
 {
 
     [Route("/calendar")]
     [ApiController]
+    [Authorize]
     public class CalendarController : ControllerBase
     {
 
@@ -26,10 +33,11 @@ namespace OrganizerApi.Calendar.CalendarControllers
         }
 
         [HttpPost("task/delete")]
-        public async Task<IActionResult?> deleteTaskFromCalendar(string userId, [FromBody] NewTaskDTO deleteTaskDTO)
+        public async Task<IActionResult?> deleteTaskFromCalendar([FromBody] NewTaskDTO deleteTaskDTO)
         {
             // Find the user by ID (assuming you have a UserService or UserRepository to retrieve the user)
-            var user = await _userService.GetUser(userId);
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var user = await _userService.GetUserByUsername(name);
             if (user == null)
             {
                 return NotFound("user not found!"); // return 404 if user not found
@@ -40,10 +48,11 @@ namespace OrganizerApi.Calendar.CalendarControllers
         }
 
         [HttpPost("task/update")]
-        public async Task<IActionResult?> updateTaskInCalendar(string userId, [FromBody] UpdateCalendarTaskDTO updateCalendarTask)
+        public async Task<IActionResult?> updateTaskInCalendar([FromBody] UpdateCalendarTaskDTO updateCalendarTask)
         {
             // Find the user by ID (assuming you have a UserService or UserRepository to retrieve the user)
-            var user = await _userService.GetUser(userId);
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var user = await _userService.GetUserByUsername(name);
             if (user == null)
             {
                 return NotFound("user not found!"); // return 404 if user not found
@@ -54,10 +63,10 @@ namespace OrganizerApi.Calendar.CalendarControllers
         }
 
         [HttpPost("task/new")]
-        public async Task<IActionResult?> addNewTaskToCalendar(string userId,[FromBody] NewTaskDTO newTaskDTO) 
+        public async Task<IActionResult?> addNewTaskToCalendar([FromBody] NewTaskDTO newTaskDTO) 
         {
-            // Find the user by ID (assuming you have a UserService or UserRepository to retrieve the user)
-            var user = await _userService.GetUser(userId);
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var user = await _userService.GetUserByUsername(name);
 
             if (user == null)
             {
@@ -67,14 +76,16 @@ namespace OrganizerApi.Calendar.CalendarControllers
             _calendarService.AddTaskToCalendar(user.Calendar, newTaskDTO);
 
             await _userService.SaveOrUpdateUserData(user);
-            return Ok("task added to calendar!");
+
+            return Ok("task added to calendar! ");
         }
 
         [HttpPost("event/add")]
-        public async Task<IActionResult?> addNewEventToCalendar(string userId, [FromBody] NewEventDTO newEventDTO)
+        public async Task<IActionResult?> addNewEventToCalendar([FromBody] NewEventDTO newEventDTO)
         {
             // Find the user by ID (assuming you have a UserService or UserRepository to retrieve the user)
-            var user = await _userService.GetUser(userId);
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var user = await _userService.GetUserByUsername(name);
             if (user == null)
             {
                 return NotFound("user not found!"); // return 404 if user not found
@@ -85,10 +96,10 @@ namespace OrganizerApi.Calendar.CalendarControllers
         }
 
         [HttpDelete("event/delete")]
-        public async Task<IActionResult?> deleteEventFromCalendar(string userId, [FromBody] NewEventDTO deleteEventDTO)
+        public async Task<IActionResult?> deleteEventFromCalendar([FromBody] NewEventDTO deleteEventDTO)
         {
-            // Find the user by ID (assuming you have a UserService or UserRepository to retrieve the user)
-            var user = await _userService.GetUser(userId);
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var user = await _userService.GetUserByUsername(name);
             if (user == null)
             {
                 return NotFound("user not found!"); // return 404 if user not found
@@ -99,10 +110,10 @@ namespace OrganizerApi.Calendar.CalendarControllers
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult?> updateCalendar(string userId, [FromBody] List<CalendarDay> calendar)
+        public async Task<IActionResult?> updateCalendar([FromBody] List<CalendarDay> calendar)
         {
-            // Find the user by ID (assuming you have a UserService or UserRepository to retrieve the user)
-            var user = await _userService.GetUser(userId);
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var user = await _userService.GetUserByUsername(name);
             if (user == null)
             {
                 return NotFound("user not found!"); // return 404 if user not found

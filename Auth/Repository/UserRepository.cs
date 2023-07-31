@@ -38,7 +38,16 @@ namespace OrganizerApi.Auth.Repository
             var iterator = container.GetItemQueryIterator<AppUser>(query);
             var response = await iterator.ReadNextAsync();
 
-            return response.Resource.First();
+            if (response.Count == 0)
+            {
+                // User not found
+                return null;
+            }
+            else
+            {
+                // Return the user
+                return response.Resource.First();
+            }
         }
 
         public async Task<AppUser> SaveNewUser(AppUser user)

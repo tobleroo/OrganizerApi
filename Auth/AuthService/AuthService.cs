@@ -51,21 +51,23 @@ namespace OrganizerApi.Auth.AuthService
             return jwt;
         }
 
-        public async Task<AppUser> Login(LoginRequest loginReq)
+        public async Task<AppUser?> Login(LoginRequest loginReq)
         {
             // find user in db by username
             var user = await _userRepository.GetUserByUsername(loginReq.Username);
-            
+
+            Console.WriteLine("in login method");
             if (user == null)
             {
-                throw new Exception("User not found");
+                Console.WriteLine("user is null in login method");
+                return null;
             }
             else
             {
                 // verify password
                 if (!BCrypt.Net.BCrypt.Verify(loginReq.Password, user.Password))
                 {
-                    throw new Exception("Invalid password");
+                    return null;
                 }
                 else
                 {
@@ -113,5 +115,7 @@ namespace OrganizerApi.Auth.AuthService
             await _userRepository.SaveNewUser(user);
             return "user saved!";
         }
+
+        
     }
 }
