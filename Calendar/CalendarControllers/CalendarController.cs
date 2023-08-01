@@ -32,6 +32,19 @@ namespace OrganizerApi.Calendar.CalendarControllers
 
         }
 
+        [HttpGet]
+        public async Task<IActionResult> getCalendar()
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var user = _userService.GetUserByUsername(name);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user.Result.Calendar);
+        }
+
+
         [HttpPost("task/delete")]
         public async Task<IActionResult?> deleteTaskFromCalendar([FromBody] NewTaskDTO deleteTaskDTO)
         {
