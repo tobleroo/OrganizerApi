@@ -15,10 +15,13 @@ namespace OrganizerApi.Calendar.Models
         [JsonPropertyName("description")]
         public string Description { get; set; }
 
-        public CalendarEvent(string title, string desc = "not set")
+        public string EventTime { get; set; }
+
+        public CalendarEvent(string title, string timeOfEvent, string desc = "not set")
         {
             Title = title;
             Description = desc;
+            EventTime = timeOfEvent;
         }
 
         // Add a parameterless constructor for deserialization

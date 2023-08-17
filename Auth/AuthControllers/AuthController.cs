@@ -50,6 +50,7 @@ namespace OrganizerApi.Auth.AuthControllers
             else
             {
                 var token = _authService.CreateJwtToken(userExists.Result);
+                
                 return Ok(token);
             }
         }
