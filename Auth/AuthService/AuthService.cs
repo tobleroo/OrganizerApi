@@ -109,7 +109,6 @@ namespace OrganizerApi.Auth.AuthService
                 Calendar = _calendarService.CreateCalendar()
             };
 
-
             await _userRepository.SaveNewUser(user);
             return "user saved!";
         }

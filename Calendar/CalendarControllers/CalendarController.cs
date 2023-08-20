@@ -136,9 +136,5 @@ namespace OrganizerApi.Calendar.CalendarControllers
             return Ok("calendar updated!");
         }
 
-        // create a new fuction
-
-
-
     }
 }
