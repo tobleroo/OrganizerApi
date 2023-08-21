@@ -16,8 +16,8 @@ using Newtonsoft.Json.Linq;
 namespace OrganizerApi.Calendar.CalendarControllers
 {
 
-    [Route("/calendar")]
     [ApiController]
+    [Route("/calendar")]
     [Authorize]
     public class CalendarController : ControllerBase
     {
