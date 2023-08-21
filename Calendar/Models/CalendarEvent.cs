@@ -17,7 +17,7 @@ namespace OrganizerApi.Calendar.Models
 
         public string EventTime { get; set; }
 
-        public CalendarEvent(string title, string timeOfEvent, string desc = "not set")
+        public CalendarEvent(string title,string desc, string timeOfEvent )
         {
             Title = title;
             Description = desc;

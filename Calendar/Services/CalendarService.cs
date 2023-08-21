@@ -104,7 +104,7 @@ namespace OrganizerApi.Calendar.Services
         {
             calendar.Where(dt => dt.Date == newEvent.Date)
                 .ToList()
-                .ForEach(dt => dt.Events.Add(new CalendarEvent(newEvent.Title, newEvent.Description)));
+                .ForEach(dt => dt.Events.Add(new CalendarEvent(newEvent.Title, newEvent.Description, newEvent.EventTime)));
         }
 
         public void RemoveEventFromCalendar(List<CalendarDay> calendar, NewEventDTO eventRemove)
