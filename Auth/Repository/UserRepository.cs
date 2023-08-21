@@ -12,7 +12,7 @@ namespace OrganizerApi.Auth.Repository
 
         private async Task InitializeContainerAsync()
         {
-            var conn = new DbConnection("https://tobleroo.documents.azure.com:443/", "8xGGAueMy7XRGYeCA8nj2mwZ6w0gDhNffoIeaWDIHdC7dMfjTght7zdQAv9zs7gZvAWM2nUMhernACDbozvSMg==",
+            var conn = new DbConnection("https://localhost:8081", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
                 "Organizer", "Users");
             container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
         }
