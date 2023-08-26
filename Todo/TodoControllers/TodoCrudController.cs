@@ -27,5 +27,18 @@ namespace OrganizerApi.Todo.TodoControllers
 
             return Ok(todoData);
         }
+
+        [HttpPost("update-tasks")]
+        public async Task<IActionResult> UpdateTodoData([FromBody] TodoDocument todoDb)
+        {
+            var res = await _todoService.UpdateTodoData(todoDb);
+            if (!res)
+            {
+                return BadRequest();
+            }else
+            {
+                return Ok();
+            }
+        }
     }
 }

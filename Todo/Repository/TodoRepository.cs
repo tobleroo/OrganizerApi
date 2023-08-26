@@ -21,28 +21,6 @@ namespace OrganizerApi.Todo.Repository
             container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
         }
 
-
-        public void AddTaskCategory(string categoryName)
-        {
-            
-            
-        }
-
-        public void AddTaskToCategory(string categoryName, string taskName, int TimeToDo, int TimeToComplete, int TimesCompleted, string LastTimeCompleted)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteTaskCategory(string categoryName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteTaskFromCategory(string categoryName, string taskName)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<TodoDocument?> GetUserTodoData(string username)
         {
             TodoDocument? foundItem = null;
@@ -74,6 +52,21 @@ namespace OrganizerApi.Todo.Repository
             {
                 // Handle any exceptions here
 
+                return null;
+            }
+        }
+
+        public async Task<TodoDocument?> UpdateTodoData(TodoDocument todoDb)
+        {
+            try
+            {
+                var res = await container.UpsertItemAsync(todoDb, new PartitionKey(todoDb.Id.ToString()));
+                return res; // Data saved successfully
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions here
+                Console.WriteLine(ex.Message);
                 return null;
             }
         }

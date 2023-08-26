@@ -42,5 +42,11 @@ namespace OrganizerApi.Todo.service
             }
             return todoData;
         }
+
+        public async Task<bool> UpdateTodoData(TodoDocument todoDb)
+        {
+            var res = await _todoContainerDb.UpdateTodoData(todoDb);
+            return res != null;
+        }
     }
 }
