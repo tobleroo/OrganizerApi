@@ -10,6 +10,8 @@ using OrganizerApi.Auth.UserService;
 using OrganizerApi.Auth.Repository;
 using OrganizerApi.Todo.service;
 using OrganizerApi.Todo.Repository;
+using OrganizerApi.Cookbook.CookRepository;
+using OrganizerApi.Cookbook.CookServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +63,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
+builder.Services.AddScoped<ICookBookRepository, CookBookRepository>();
+builder.Services.AddScoped<ICookBookService, CookbookService>();
 
 var app = builder.Build();
 
