@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
 using OrganizerApi.Auth.Repository;
 using OrganizerApi.Cookbook.CookModels;
+using System.Net;
 
 namespace OrganizerApi.Cookbook.CookRepository
 {
@@ -42,6 +43,31 @@ namespace OrganizerApi.Cookbook.CookRepository
         {
             ItemResponse<UserCookBook> response = await container.CreateItemAsync(cookbook, new PartitionKey(cookbook.id.ToString()));
             return response.Resource;
+        }
+
+        //create method to createor update a cookbook
+        public async Task<bool> UpdateCookBook(UserCookBook cookbook)
+        {
+            try
+            {
+                ItemResponse<UserCookBook> response = await container.UpsertItemAsync(cookbook, new PartitionKey(cookbook.id.ToString()));
+
+                // Check the status code to determine success or failure.
+                if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
+                {
+                    return true; // Operation succeeded
+                }
+                else
+                {
+                    return false; // Operation failed
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions here
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return false; // Operation failed due to an exception
+            }
         }
     }
 }

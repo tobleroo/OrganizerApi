@@ -41,10 +41,32 @@ namespace OrganizerApi.Cookbook.CookServices
             recipe.Ingredients.Add(ingredient2);
 
             newCookBook.Recipes.Add(recipe);
+            // create more recipes
+            var recipe2 = new Recipe { RecipeName = "Chicken Alfredo" };
+            recipe2.Ingredients.Add(ingredient1);
+            recipe2.Ingredients.Add(ingredient2);
+            newCookBook.Recipes.Add(recipe2);
+
+            var recipe3 = new Recipe { RecipeName = "carbonara" };
+            recipe3.Ingredients.Add(ingredient1);
+            recipe3.Ingredients.Add(ingredient2);
+            newCookBook.Recipes.Add(recipe3);
+
+            var recipe4 = new Recipe { RecipeName = "meatloaf" };
+            recipe4.Ingredients.Add(ingredient1);
+            recipe4.Ingredients.Add(ingredient2);
+            newCookBook.Recipes.Add(recipe4);
 
             var newShoppingLisr = new ShoppingList { ListName = "veckohandel" };
+            newShoppingLisr.Ingredients.Add(ingredient1);
+            newShoppingLisr.Ingredients.Add(ingredient2);
             newCookBook.ShoppingList.Add(newShoppingLisr);
             return newCookBook;
+        }
+
+        public async Task<bool> UpdateCookbook(UserCookBook cookbook)
+        {
+            return await _cookbookRepository.UpdateCookBook(cookbook);
         }
     }
 }

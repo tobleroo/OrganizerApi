@@ -8,5 +8,7 @@ namespace OrganizerApi.Cookbook.CookServices
         Task<UserCookBook> GetCookBook(string username);
 
         UserCookBook PopulateCookBookDemos(string username);
+
+        Task<bool> UpdateCookbook(UserCookBook cookbook);
     }
 }
