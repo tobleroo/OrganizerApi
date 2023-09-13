@@ -30,7 +30,7 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
                 return NotFound();
             }
 
-            var listOfRecipes = MealPlanner.GetRecipesForWeek(cookBook);
+            var listOfRecipes = MealPlanner.GetRandomMeals(cookBook);
             return listOfRecipes == null ? NotFound() : Ok(listOfRecipes);
         }
     }

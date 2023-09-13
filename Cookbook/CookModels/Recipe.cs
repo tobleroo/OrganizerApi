@@ -1,4 +1,6 @@
-﻿namespace OrganizerApi.Cookbook.CookModels
+﻿using Newtonsoft.Json.Linq;
+
+namespace OrganizerApi.Cookbook.CookModels
 {
     public class Recipe
     {
@@ -10,7 +12,20 @@
 
         public int CookTime { get; set; } = 0;
 
-        public string? Difficulty { get; set; } = "not set";
+        public RecipeDifficulties Difficulty { get; set; } = RecipeDifficulties.Easy;
         public int TimesCooked { get; set; } = 0;
+        public bool IsVegan { get; set; } = false;
+
+        private int _spicyness = 0;
+        public int Spicyness
+        {
+            get { return _spicyness; }
+            set
+            {
+                if (value >= 1 && value <= 5) _spicyness = value;
+                else throw new ArgumentOutOfRangeException("Spicyness must be between 1 and 5.");
+            }
+        }
+
     }
 }

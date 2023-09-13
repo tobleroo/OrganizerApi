@@ -4,7 +4,7 @@ namespace OrganizerApi.Cookbook.CookServices
 {
     public static class MealPlanner
     {
-        public static List<Recipe> GetRecipesForWeek(UserCookBook cookBook)
+        public static List<Recipe> GetRandomMeals(UserCookBook cookBook)
         {
             var recipes = new List<Recipe>();
             var random = new Random();
@@ -16,5 +16,19 @@ namespace OrganizerApi.Cookbook.CookServices
             }
             return recipes;
         }
+
+        public static List<Recipe> GetRandomMeals(UserCookBook cookBook, int count)
+        {
+            var recipes = new List<Recipe>();
+            var random = new Random();
+            var recipeCount = cookBook.Recipes.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var recipeIndex = random.Next(recipeCount);
+                recipes.Add(cookBook.Recipes[recipeIndex]);
+            }
+            return recipes;
+        }
+
     }
 }
