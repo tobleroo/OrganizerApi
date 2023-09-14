@@ -50,7 +50,7 @@ builder.Services.AddCors(options =>
                           policy =>
                           {
                               policy.WithOrigins("http://localhost:3000", // ändra address
-                                                  "http://www.contoso.com")
+                                                  "http://localhost:5007")
                                                   .AllowAnyHeader()
                                                   .AllowAnyMethod();
                           });
