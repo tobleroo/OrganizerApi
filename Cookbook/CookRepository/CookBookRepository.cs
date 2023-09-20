@@ -22,7 +22,7 @@ namespace OrganizerApi.Cookbook.CookRepository
         public async Task<UserCookBook>? GetCookBook(string username)
         {
             //retrieve the cookbook from the database using the username
-            var sqlQueryText = $"SELECT * FROM c WHERE c.Owner = '{username}'";
+            var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
             FeedIterator<UserCookBook> queryResultSetIterator = container.GetItemQueryIterator<UserCookBook>(queryDefinition);
 
