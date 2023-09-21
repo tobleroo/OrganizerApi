@@ -16,6 +16,8 @@ namespace OrganizerApi.Cookbook.CookModels
         public int TimesCooked { get; set; } = 0;
         public bool IsVegan { get; set; } = false;
 
+        public int Portions { get; set; } = 1;
+
         private int _spicyness = 1;
         public int Spicyness
         {
