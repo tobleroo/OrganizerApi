@@ -8,6 +8,10 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using OrganizerApi.Auth.UserService;
 using OrganizerApi.Auth.Repository;
+using OrganizerApi.Todo.service;
+using OrganizerApi.Todo.Repository;
+using OrganizerApi.Cookbook.CookRepository;
+using OrganizerApi.Cookbook.CookServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +50,8 @@ builder.Services.AddCors(options =>
                           policy =>
                           {
                               policy.WithOrigins("http://localhost:3000", // ändra address
-                                                  "http://www.contoso.com")
+                                                  "http://localhost:5007",
+                                                  "https://localhost:7265")
                                                   .AllowAnyHeader()
                                                   .AllowAnyMethod();
                           });
@@ -57,6 +62,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITodoService, TodoService>();
+builder.Services.AddScoped<ITodoRepository, TodoRepository>();
+builder.Services.AddScoped<ICookBookRepository, CookBookRepository>();
+builder.Services.AddScoped<ICookBookService, CookbookService>();
 
 var app = builder.Build();
 
