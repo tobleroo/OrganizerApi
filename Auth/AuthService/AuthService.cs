@@ -89,7 +89,7 @@ namespace OrganizerApi.Auth.AuthService
                 return "User already exists";
             }
 
-            if (newUser.registrationCode != "jeffkaff2000")
+            if (newUser.RegistrationCode != "jeffkaff2000")
             {
                 return "not right code!";
             }
