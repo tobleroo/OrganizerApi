@@ -15,12 +15,17 @@ namespace OrganizerApi.Cookbook.CookServices
             foreach (var desiredReqs in desiredTypes)
             {
 
+                Console.WriteLine(desiredReqs.Difficulty);
+                Console.WriteLine(desiredReqs.Category);
+
+                Console.WriteLine(userCookbook[0].Difficulty + " " + userCookbook[0].RecipeType);
+
                 //filter for the requirement
                 var filteredCookbook = userCookbook
                     .Where(recipe => 
                     (recipe.CookTime > desiredReqs.MaxCookTime) &&
-                    (desiredReqs.Difficulty == "any" || recipe.Difficulty.ToString() == desiredReqs.Difficulty) &&
-                    (desiredReqs.Category == recipe.RecipeType.ToString()))
+                    (desiredReqs.Difficulty ==  "Any" || recipe.Difficulty.ToString() == desiredReqs.Difficulty) &&
+                    (desiredReqs.Category == "Any" || desiredReqs.Category == recipe.RecipeType.ToString()))
                     .ToList();
 
                 //add a random of the ones left in the list
