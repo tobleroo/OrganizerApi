@@ -32,7 +32,6 @@ namespace OrganizerApi.Cookbook.CookServices
 
             }
 
-
             return result;
         }
 

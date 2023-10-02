@@ -8,8 +8,8 @@ using System.Security.Claims;
 
 namespace OrganizerApi.Cookbook.CookCrudControllers
 {
-    [Route("/mealplanner")]
     [ApiController]
+    [Route("meal")]
     [Authorize]
     public class MealPlanerController : Controller
     {
@@ -21,20 +21,28 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             _cookbookRepository = cookBookRepository;
         }
 
-        [HttpPost("/easy")]
+        [HttpPost("easy")]
         public async Task<ActionResult<List<Recipe>>> CreateEasyMealPLan([FromBody] List<RecipeRequestEasyDTO> desiredRecipeTypes)
         {
-            //get user name
-            var name = User.FindFirstValue(ClaimTypes.Name);
-            var cookBook = await _cookbookRepository.GetCookBook(name);
-            if (cookBook == null)
+            try
             {
-                return NotFound();
-            }
+                //get user name
+                var name = User.FindFirstValue(ClaimTypes.Name);
+                var cookBook = await _cookbookRepository.GetCookBook(name);
+                if (cookBook == null)
+                {
+                    return NotFound();
+                }
 
-            //send the list of required recipes and the cookbook to the method
-            var mealplan = MealPlanner.CreateEasyMealPlan(desiredRecipeTypes, cookBook.Recipes);
-            return Ok(mealplan);
+                //send the list of required recipes and the cookbook to the method
+                var mealplan = MealPlanner.CreateEasyMealPlan(desiredRecipeTypes, cookBook.Recipes);
+                return Ok(mealplan);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception and return an appropriate response
+                return BadRequest("An error occurred: " + ex.Message);
+            }
         }
     }
 }
