@@ -1,33 +1,39 @@
 ﻿using OrganizerApi.Cookbook.CookModels;
+using OrganizerBlazor.Models;
 
 namespace OrganizerApi.Cookbook.CookServices
 {
     public static class MealPlanner
     {
-        public static List<Recipe> GetRandomMeals(UserCookBook cookBook)
+        
+        public static List<Recipe> CreateEasyMealPlan(List<RecipeRequestEasyDTO> desiredTypes, List<Recipe> userCookbook)
         {
-            var recipes = new List<Recipe>();
-            var random = new Random();
-            var recipeCount = cookBook.Recipes.Count;
-            for (int i = 0; i < recipeCount; i++)
-            {
-                var recipeIndex = random.Next(recipeCount);
-                recipes.Add(cookBook.Recipes[recipeIndex]);
-            }
-            return recipes;
-        }
 
-        public static List<Recipe> GetRandomMeals(UserCookBook cookBook, int count)
-        {
-            var recipes = new List<Recipe>();
-            var random = new Random();
-            var recipeCount = cookBook.Recipes.Count;
-            for (int i = 0; i < count; i++)
+            List<Recipe> result = new();
+
+            //run thru all desired recipes.
+            foreach (var desiredReqs in desiredTypes)
             {
-                var recipeIndex = random.Next(recipeCount);
-                recipes.Add(cookBook.Recipes[recipeIndex]);
+
+                //filter for the requirement
+                var filteredCookbook = userCookbook
+                    .Where(recipe => 
+                    (recipe.CookTime > desiredReqs.MaxCookTime) &&
+                    (desiredReqs.Difficulty == "any" || recipe.Difficulty.ToString() == desiredReqs.Difficulty) &&
+                    (desiredReqs.Category == recipe.RecipeType.ToString()))
+                    .ToList();
+
+                //add a random of the ones left in the list
+                
+                if(filteredCookbook.Count >= 1) {
+                    int random = new Random().Next(0, filteredCookbook.Count);
+                    result.Add(filteredCookbook[random]);
+                }
+
             }
-            return recipes;
+
+
+            return result;
         }
 
     }

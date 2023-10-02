@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookRepository;
 using OrganizerApi.Cookbook.CookServices;
+using OrganizerBlazor.Models;
 using System.Security.Claims;
 
 namespace OrganizerApi.Cookbook.CookCrudControllers
@@ -20,9 +21,10 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             _cookbookRepository = cookBookRepository;
         }
 
-        [HttpGet("/random-list")]
-        public async Task<ActionResult<List<Recipe>>> GetRecipesForWeek()
+        [HttpPost("/easy")]
+        public async Task<ActionResult<List<Recipe>>> CreateEasyMealPLan([FromBody] List<RecipeRequestEasyDTO> desiredRecipeTypes)
         {
+            //get user name
             var name = User.FindFirstValue(ClaimTypes.Name);
             var cookBook = await _cookbookRepository.GetCookBook(name);
             if (cookBook == null)
@@ -30,8 +32,9 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
                 return NotFound();
             }
 
-            var listOfRecipes = MealPlanner.GetRandomMeals(cookBook);
-            return listOfRecipes == null ? NotFound() : Ok(listOfRecipes);
+            //send the list of required recipes and the cookbook to the method
+            var mealplan = MealPlanner.CreateEasyMealPlan(desiredRecipeTypes, cookBook.Recipes);
+            return Ok(mealplan);
         }
     }
 }
