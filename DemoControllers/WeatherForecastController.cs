@@ -22,7 +22,7 @@ namespace OrganizerApi.Controllers
         [HttpGet(Name = "GetWeatherForecast")]
         public string Get()
         {
-            return "Hello";
+            return "Hello there";
         }
     }
 }
