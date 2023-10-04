@@ -14,9 +14,6 @@ namespace OrganizerApi.Cookbook.CookServices
             //run thru all desired recipes.
             foreach (var desiredReqs in desiredTypes)
             {
-
-                Console.WriteLine($"desired -> {desiredReqs.Category} and cookbookrecipe -> {userCookbook[0].RecipeType}");
-                Console.WriteLine($"desired -> {desiredReqs.Difficulty} and cookbookrecipe -> {userCookbook[0].Difficulty}");
                 //filter for the requirement
                 var filteredCookbook = userCookbook
                     .Where(recipe => 
