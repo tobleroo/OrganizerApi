@@ -51,7 +51,8 @@ builder.Services.AddCors(options =>
                           {
                               policy.WithOrigins("http://localhost:3000", // ändra address
                                                   "http://localhost:5007",
-                                                  "https://localhost:7066")
+                                                  "https://localhost:7066",
+                                                  "https://ashy-cliff-060617603.3.azurestaticapps.net")
                                                   .AllowAnyHeader()
                                                   .AllowAnyMethod();
                           });
@@ -70,9 +71,10 @@ builder.Services.AddScoped<ICookBookService, CookbookService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseSwagger();
+
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
     app.UseSwaggerUI();
 }
 

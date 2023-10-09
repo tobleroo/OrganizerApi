@@ -6,8 +6,8 @@ using OrganizerApi.Auth.models.DTOs;
 
 namespace OrganizerApi.Auth.AuthControllers
 {
-    [Route("auth")]
     [ApiController]
+    [Route("/auth")]
     public class AuthController : ControllerBase
     {
 
