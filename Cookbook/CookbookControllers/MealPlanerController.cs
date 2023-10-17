@@ -59,5 +59,19 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             var finishedShoppingList = ShoppingListCreator.CreateShoppingList(recipiesToUse, cookBook.Recipes);
             return Ok(finishedShoppingList);
         }
+
+        [HttpGet("specific-Meal-Gen-Recipe-Details")]
+        public async Task<ActionResult<Dictionary<string, List<SpecificRecipeForMealGenDetails>>>> GetRecipeDetailsForSpecificGen()
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var cookBook = await _cookbookRepository.GetCookBook(name);
+            if (cookBook == null)
+            {
+                return NotFound();
+            }
+
+            var recipeNamesList = MealPlanner.CreateRecipeListForSepcificGenerator(cookBook);
+            return Ok(recipeNamesList);
+        }
     }
 }

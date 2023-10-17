@@ -1,4 +1,5 @@
 ﻿using OrganizerApi.Cookbook.CookModels;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerBlazor.Models;
 
 namespace OrganizerApi.Cookbook.CookServices
@@ -32,6 +33,36 @@ namespace OrganizerApi.Cookbook.CookServices
             }
 
             return result;
+        }
+
+        public static Dictionary<string, List<SpecificRecipeForMealGenDetails>> CreateRecipeListForSepcificGenerator(UserCookBook cookbook)
+        {
+            List<string> recipeTypesToCheck = new List<string>()
+            {
+                "Breakfast", "Lunch", "Dinner", "Dessert", "Snack"
+            };
+
+            Dictionary<string, List<SpecificRecipeForMealGenDetails>> recipeList = new();
+
+            for (int i = 0; i < recipeTypesToCheck.Count; i++)
+            {
+                List<SpecificRecipeForMealGenDetails> result = new();
+                foreach (var recipeCheck in cookbook.Recipes)
+                {
+                    if(recipeCheck.RecipeType.ToString() ==  recipeTypesToCheck[i]) {
+                        var recippeDetailsDTO = new SpecificRecipeForMealGenDetails()
+                        {
+                            id = recipeCheck.Guid.ToString(),
+                            RecipeName = recipeCheck.RecipeName,
+                        };
+                        result.Add(recippeDetailsDTO);
+                    }
+                }
+                recipeList.Add(recipeTypesToCheck[i], result);
+            }
+
+            return recipeList;
+            
         }
 
     }
