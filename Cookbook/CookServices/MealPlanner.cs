@@ -65,5 +65,12 @@ namespace OrganizerApi.Cookbook.CookServices
             
         }
 
+        public static List<Recipe> CreateSpecificMealPlan(List<RecipeRequestSpecificDTO> recipiesWanted, List<Recipe> cookbook)
+        {
+            return cookbook
+                .Where(r => recipiesWanted.Any(req => req.Name == r.RecipeName))
+                .ToList();
+        }
+
     }
 }

@@ -73,5 +73,28 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             var recipeNamesList = MealPlanner.CreateRecipeListForSepcificGenerator(cookBook);
             return Ok(recipeNamesList);
         }
+
+        [HttpPost("specific")]
+        public async Task<ActionResult<List<Recipe>>> PostSpecificMealGenerator([FromBody] List<RecipeRequestSpecificDTO> specificRecipesWanted){
+            try
+            {
+                //get user name
+                var name = User.FindFirstValue(ClaimTypes.Name);
+                var cookBook = await _cookbookRepository.GetCookBook(name);
+                if (cookBook == null)
+                {
+                    return NotFound();
+                }
+
+                //send the list of required recipes and the cookbook to the method
+                var mealplan = MealPlanner.CreateSpecificMealPlan(specificRecipesWanted, cookBook.Recipes);
+                return Ok(mealplan);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception and return an appropriate response
+                return BadRequest("An error occurred: " + ex.Message);
+            }
+        }
     }
 }
