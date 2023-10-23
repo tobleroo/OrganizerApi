@@ -25,6 +25,15 @@ namespace OrganizerApi.Cookbook.CookServices
             return cookBook;
         }
 
+        public async Task<bool> UpdateShopppingListOfCookbook(UserCookBook cookbook, ShoppingList newShoppingList)
+        {
+            Console.WriteLine("here");
+            Console.WriteLine($"list one called -> {cookbook.ShoppingList[0].ListName}");
+            cookbook.ShoppingList[0] = newShoppingList;
+            var res = await _cookbookRepository.UpdateCookBook(cookbook);
+            return res;
+        }
+
         public UserCookBook PopulateCookBookDemos(string username)
         {
             var newCookBook = new UserCookBook { OwnerUsername = username};
@@ -67,6 +76,11 @@ namespace OrganizerApi.Cookbook.CookServices
         public async Task<bool> UpdateCookbook(UserCookBook cookbook)
         {
             return await _cookbookRepository.UpdateCookBook(cookbook);
+        }
+
+        public async Task<ShoppingList> FetchShoppingList(string username)
+        {
+            return await _cookbookRepository.GetShoppingList(username);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         private async Task InitializeContainerAsync()
         {
-            var conn = new DbConnection("https://tobleroo.documents.azure.com:443/", "8xGGAueMy7XRGYeCA8nj2mwZ6w0gDhNffoIeaWDIHdC7dMfjTght7zdQAv9zs7gZvAWM2nUMhernACDbozvSMg==",
+            var conn = new DbConnection("https://localhost:8081", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
                 "Organizer", "cookbook");
             container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
         }
@@ -68,6 +68,30 @@ namespace OrganizerApi.Cookbook.CookRepository
                 Console.WriteLine($"An error occurred: {ex.Message}");
                 return false; // Operation failed due to an exception
             }
+        }
+
+        public async Task<ShoppingList?> GetShoppingList(string username)
+        {
+            // Define the SQL query to fetch the entire ShoppingList for the given username
+            var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";
+            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
+
+            FeedIterator<UserCookBook> queryResultSetIterator = container.GetItemQueryIterator<UserCookBook>(queryDefinition);
+
+            List<ShoppingList> allShoppingLists = new List<ShoppingList>();
+
+            // Iterate over the results
+            while (queryResultSetIterator.HasMoreResults)
+            {
+                FeedResponse<UserCookBook> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                foreach (UserCookBook cookbook in currentResultSet)
+                {
+                    allShoppingLists.AddRange(cookbook.ShoppingList);
+                }
+            }
+
+            // Return all the consolidated ShoppingLists
+            return allShoppingLists[0];
         }
     }
 }

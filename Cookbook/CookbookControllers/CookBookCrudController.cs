@@ -33,5 +33,23 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             var result = await _cookBookService.UpdateCookbook(cookBook);
             return result ? Ok() : BadRequest();
         }
+
+        [HttpPost("update-shoppinglist")]
+        public async Task<IActionResult> UpdateShoppinglist([FromBody] ShoppingList shoppingList)
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var cookBook = await _cookBookService.GetCookBook(name);
+
+            var res = await _cookBookService.UpdateShopppingListOfCookbook(cookBook, shoppingList);
+            return res ? Ok() : BadRequest();
+        }
+
+        [HttpGet("get-shoppinglist")]
+        public async Task<ShoppingList> RecieveShoppingList()
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var list = await _cookBookService.FetchShoppingList(name);
+            return list;
+        }
     }
 }

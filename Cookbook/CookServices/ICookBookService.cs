@@ -10,5 +10,8 @@ namespace OrganizerApi.Cookbook.CookServices
         UserCookBook PopulateCookBookDemos(string username);
 
         Task<bool> UpdateCookbook(UserCookBook cookbook);
+
+        Task<bool> UpdateShopppingListOfCookbook(UserCookBook cookbook, ShoppingList newShoppingList);
+        Task<ShoppingList> FetchShoppingList(string username);
     }
 }
