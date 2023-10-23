@@ -90,7 +90,7 @@ namespace OrganizerApi.Cookbook.CookRepository
                 }
             }
 
-            // Return all the consolidated ShoppingLists
+            // Return all the consolidated ShoppiangLists
             return allShoppingLists[0];
         }
     }
