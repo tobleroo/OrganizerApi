@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
 using OrganizerApi.Auth.Repository;
 using OrganizerApi.Cookbook.CookModels;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using System.Net;
 
 namespace OrganizerApi.Cookbook.CookRepository
@@ -70,28 +71,65 @@ namespace OrganizerApi.Cookbook.CookRepository
             }
         }
 
-        public async Task<ShoppingList?> GetShoppingList(string username)
+        public async Task<ShoppingListALLItems?> GetShoppingList(string username)
         {
-            // Define the SQL query to fetch the entire ShoppingList for the given username
+            // Define the SQL query to fetch the entire UserCookBook for the given username
             var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";
             QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
 
             FeedIterator<UserCookBook> queryResultSetIterator = container.GetItemQueryIterator<UserCookBook>(queryDefinition);
 
-            List<ShoppingList> allShoppingLists = new List<ShoppingList>();
+            ShoppingListALLItems? shoppingListALLItems = null;
 
-            // Iterate over the results
+            // Iterate over the results (assuming a user will have only one UserCookBook)
             while (queryResultSetIterator.HasMoreResults)
             {
                 FeedResponse<UserCookBook> currentResultSet = await queryResultSetIterator.ReadNextAsync();
                 foreach (UserCookBook cookbook in currentResultSet)
                 {
-                    allShoppingLists.AddRange(cookbook.ShoppingList);
+                    shoppingListALLItems = new ShoppingListALLItems()
+                    {
+                        ShoppingList = cookbook.ShoppingList.FirstOrDefault(), // Assuming you want the first shopping list
+                        EarlierAddedAdditionalItems = cookbook.PreviouslyAddedAdditonalItems
+                    };
                 }
             }
 
-            // Return all the consolidated ShoppiangLists
-            return allShoppingLists[0];
+            return shoppingListALLItems;
+        }
+
+        public async Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate)
+        {
+            // Step 1: Get the UserCookBook associated with the given username
+            UserCookBook? userCookBook = await GetCookBook(username);
+
+            if (userCookBook == null)
+            {
+                // Handle the case where no UserCookBook exists for the given username
+                return false;
+            }
+
+            // Step 2: Use Patch API to update the PreviouslyAddedAdditonalItems
+            try
+            {
+                var patchOperations = new List<PatchOperation>
+        {
+            PatchOperation.Replace("/PreviouslyAddedAdditonalItems", shoppinglistToUpdate)
+        };
+
+                await container.PatchItemAsync<UserCookBook>(
+                    id: userCookBook.id.ToString(),
+                    partitionKey: new PartitionKey(username),
+                    patchOperations: patchOperations
+                );
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while updating additional items: {ex.Message}");
+                return false;
+            }
         }
     }
 }

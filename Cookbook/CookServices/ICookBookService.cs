@@ -1,4 +1,5 @@
 ﻿using OrganizerApi.Cookbook.CookModels;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 
 namespace OrganizerApi.Cookbook.CookServices
 {
@@ -12,6 +13,8 @@ namespace OrganizerApi.Cookbook.CookServices
         Task<bool> UpdateCookbook(UserCookBook cookbook);
 
         Task<bool> UpdateShopppingListOfCookbook(UserCookBook cookbook, ShoppingList newShoppingList);
-        Task<ShoppingList> FetchShoppingList(string username);
+        Task<ShoppingListALLItems> FetchShoppingList(string username);
+
+        Task<bool> AddNewAdditonalItemsToCookbook(string username, List<string> additionalItemsSaved, List<string> newItemsTosave);
     }
 }

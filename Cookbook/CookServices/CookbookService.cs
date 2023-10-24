@@ -1,5 +1,7 @@
 ﻿using OrganizerApi.Cookbook.CookModels;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerApi.Cookbook.CookRepository;
+using System.Drawing.Text;
 
 namespace OrganizerApi.Cookbook.CookServices
 {
@@ -78,9 +80,33 @@ namespace OrganizerApi.Cookbook.CookServices
             return await _cookbookRepository.UpdateCookBook(cookbook);
         }
 
-        public async Task<ShoppingList> FetchShoppingList(string username)
+        public async Task<ShoppingListALLItems> FetchShoppingList(string username)
         {
             return await _cookbookRepository.GetShoppingList(username);
+        }
+
+        public async Task<bool> AddNewAdditonalItemsToCookbook(string username ,List<string> additionalItemsSaved, List<string> newItemsTosave)
+        {
+
+            bool changesMade = false;
+            if(newItemsTosave != null || newItemsTosave.Count > 0) {
+                foreach (var item in newItemsTosave) {
+                    if(!additionalItemsSaved.Contains(item))
+                    {
+                        additionalItemsSaved.Add(item);
+                        changesMade = true;
+                    }
+                }
+            }
+
+            //if true, update list in backend
+            if(changesMade)
+            {
+                await _cookbookRepository.UpsertAdditionalItemsShoppingList(username, additionalItemsSaved);
+                return true;
+            }
+
+            return false;
         }
     }
 }
