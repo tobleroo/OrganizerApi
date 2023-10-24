@@ -109,27 +109,11 @@ namespace OrganizerApi.Cookbook.CookRepository
                 return false;
             }
 
-            // Step 2: Use Patch API to update the PreviouslyAddedAdditonalItems
-            try
-            {
-                var patchOperations = new List<PatchOperation>
-        {
-            PatchOperation.Replace("/PreviouslyAddedAdditonalItems", shoppinglistToUpdate)
-        };
+            userCookBook.PreviouslyAddedAdditonalItems = shoppinglistToUpdate;
+            await UpdateCookBook(userCookBook);
+            return true;
 
-                await container.PatchItemAsync<UserCookBook>(
-                    id: userCookBook.id.ToString(),
-                    partitionKey: new PartitionKey(username),
-                    patchOperations: patchOperations
-                );
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred while updating additional items: {ex.Message}");
-                return false;
-            }
+            
         }
     }
 }

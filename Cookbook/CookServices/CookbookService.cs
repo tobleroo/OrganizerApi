@@ -29,8 +29,6 @@ namespace OrganizerApi.Cookbook.CookServices
 
         public async Task<bool> UpdateShopppingListOfCookbook(UserCookBook cookbook, ShoppingList newShoppingList)
         {
-            Console.WriteLine("here");
-            Console.WriteLine($"list one called -> {cookbook.ShoppingList[0].ListName}");
             cookbook.ShoppingList[0] = newShoppingList;
             var res = await _cookbookRepository.UpdateCookBook(cookbook);
             return res;
@@ -102,6 +100,9 @@ namespace OrganizerApi.Cookbook.CookServices
             //if true, update list in backend
             if(changesMade)
             {
+                //sort the list alphabetically
+                additionalItemsSaved.Sort(StringComparer.OrdinalIgnoreCase);
+
                 await _cookbookRepository.UpsertAdditionalItemsShoppingList(username, additionalItemsSaved);
                 return true;
             }
