@@ -1,5 +1,6 @@
 ﻿using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
 
 namespace OrganizerApi.Cookbook.CookServices
 {
@@ -11,7 +12,7 @@ namespace OrganizerApi.Cookbook.CookServices
 
             List<ShoppingListRecipeDetails> shoppingList = new();
 
-            foreach(var item in wantedRecipies)
+            foreach (var item in wantedRecipies)
             {
                 foreach (var recipe in userCookbook)
                 {
@@ -19,9 +20,9 @@ namespace OrganizerApi.Cookbook.CookServices
                     {
                         List<Ingredient> updatedListToNewPortionSize = new List<Ingredient>();
 
-                        foreach(var ingredient in recipe.Ingredients)
+                        foreach (var ingredient in recipe.Ingredients)
                         {
-                            var updatedDataToIngredient = ConvertIngrToNewPortionValue(item.PortionsAmount ,ingredient, recipe.Portions);
+                            var updatedDataToIngredient = ConvertIngrToNewPortionValue(item.PortionsAmount, ingredient, recipe.Portions);
                             updatedListToNewPortionSize.Add(updatedDataToIngredient);
                         }
 

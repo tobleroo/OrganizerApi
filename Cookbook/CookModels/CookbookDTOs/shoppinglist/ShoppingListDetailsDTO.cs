@@ -1,4 +1,4 @@
-﻿namespace OrganizerApi.Cookbook.CookModels.CookbookDTOs
+﻿namespace OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist
 {
     public class ShoppingListDetailsDTO
     {

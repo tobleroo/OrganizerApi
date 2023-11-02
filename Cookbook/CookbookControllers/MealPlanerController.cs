@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
 using OrganizerApi.Cookbook.CookRepository;
 using OrganizerApi.Cookbook.CookServices;
 using OrganizerBlazor.Models;

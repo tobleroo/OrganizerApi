@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
 using OrganizerApi.Cookbook.CookServices;
 using System.Security.Claims;
 
@@ -35,25 +36,38 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             return result ? Ok() : BadRequest();
         }
 
-        [HttpPost("update-shoppinglist")]
-        public async Task<IActionResult> UpdateShoppinglist([FromBody] ShoppingList shoppingList)
+        [HttpPost("add-to-shoppinglist")]
+        public async Task<IActionResult> AddToShoppinglist([FromBody] SingleShopList shopList)
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
             var cookBook = await _cookBookService.GetCookBook(name);
 
-            //add the additional items to public list with all items
-            await _cookBookService.AddNewAdditonalItemsToCookbook(name, cookBook.PreviouslyAddedAdditonalItems, shoppingList.AdditionalItems);
+            //add recipes to current shoppinglist
+            bool successfullyAddedRecipes = await _cookBookService.AddRecipesToShoppingList(cookBook,shopList);
 
-            var res = await _cookBookService.UpdateShopppingListOfCookbook(cookBook, shoppingList);
-            return res ? Ok() : BadRequest();
+            return successfullyAddedRecipes ? Ok() : BadRequest();
         }
 
         [HttpGet("get-shoppinglist")]
-        public async Task<ShoppingListALLItems> RecieveShoppingList()
+        public async Task<ShoppingListPageDTO> RecieveShoppingList()
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
             var list = await _cookBookService.FetchShoppingList(name);
-            return list;
+            var additonalItems = await _cookBookService.FetchAdditonalItemsFromCosmos(name);
+            ShoppingListPageDTO shoppingPageData = new ShoppingListPageDTO()
+            {
+                SingleShopList = list,
+                AdditionalItems = additonalItems
+            };
+            return shoppingPageData;
         }
+
+        [HttpPost("update-shoppinglist")]
+        public async Task<IActionResult> UpdateShopingListItems(ShoppingListPageDTO updatedList)
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var success = await _cookBookService.UpdateShoppingListOfCookbook(name, updatedList);
+            return Ok(success);
+        } 
     }
 }

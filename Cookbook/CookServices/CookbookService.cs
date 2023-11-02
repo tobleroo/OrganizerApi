@@ -1,5 +1,6 @@
 ﻿using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
 using OrganizerApi.Cookbook.CookRepository;
 using System.Drawing.Text;
 
@@ -22,16 +23,38 @@ namespace OrganizerApi.Cookbook.CookServices
             var cookBook = await _cookbookRepository.GetCookBook(username);
             if (cookBook == null)
             {
-                return await _cookbookRepository.SaveNewCookBook(PopulateCookBookDemos(username));
+                //return await _cookbookRepository.SaveNewCookBook(PopulateCookBookDemos(username));
             }
             return cookBook;
         }
 
-        public async Task<bool> UpdateShopppingListOfCookbook(UserCookBook cookbook, ShoppingList newShoppingList)
+        public async Task<bool> AddRecipesToShoppingList(UserCookBook cookbook,SingleShopList shoplistDetails)
         {
-            cookbook.ShoppingList[0] = newShoppingList;
-            var res = await _cookbookRepository.UpdateCookBook(cookbook);
-            return res;
+            //go through the cookbook 
+            var allShoppingLists = cookbook.ShoppingLists;
+
+            var originalShoplist = allShoppingLists.FirstOrDefault(shopplingList => shopplingList.ListName == shoplistDetails.ListName);
+
+            if(originalShoplist == null) cookbook.ShoppingLists.Add(shoplistDetails);
+                else originalShoplist.SingleShopListRecipes.AddRange(shoplistDetails.SingleShopListRecipes);
+
+            return await UpdateCookbook(cookbook);
+
+        }
+
+        public async Task<bool> UpdateShoppingListOfCookbook(string username, ShoppingListPageDTO newShoppingList)
+        {
+            var cookbook = await _cookbookRepository.GetCookBook(username);
+            ReplaceAdditionalItemsList(cookbook, newShoppingList.AdditionalItems);
+            cookbook.ShoppingLists.RemoveAll(name => name.ListName == newShoppingList.SingleShopList.ListName);
+            cookbook.ShoppingLists.Add(newShoppingList.SingleShopList);
+
+            if (cookbook.ShoppingLists.Contains(newShoppingList.SingleShopList))
+            {
+                await _cookbookRepository.UpdateCookBook(cookbook);
+                return true;
+            }
+            return false;
         }
 
         public UserCookBook PopulateCookBookDemos(string username)
@@ -41,8 +64,6 @@ namespace OrganizerApi.Cookbook.CookServices
             //create 2 ingredients
             var ingredient1 = new Ingredient { Name = "Chicken Breast", Quantity = 2, Unit = "lbs" };
             var ingredient2 = new Ingredient { Name = "Pasta", Quantity = 1, Unit = "lbs" };
-
-
 
             var recipe = new Recipe { RecipeName = "Chicken Parmesan" };
             //set recipe ingredient list with created ingredients
@@ -66,10 +87,6 @@ namespace OrganizerApi.Cookbook.CookServices
             recipe4.Ingredients.Add(ingredient2);
             newCookBook.Recipes.Add(recipe4);
 
-            var newShoppingLisr = new ShoppingList { ListName = "veckohandel" };
-            newShoppingLisr.Ingredients.Add(ingredient1);
-            newShoppingLisr.Ingredients.Add(ingredient2);
-            newCookBook.ShoppingList.Add(newShoppingLisr);
             return newCookBook;
         }
 
@@ -78,36 +95,22 @@ namespace OrganizerApi.Cookbook.CookServices
             return await _cookbookRepository.UpdateCookBook(cookbook);
         }
 
-        public async Task<ShoppingListALLItems> FetchShoppingList(string username)
+        public async Task<SingleShopList> FetchShoppingList(string username)
         {
-            return await _cookbookRepository.GetShoppingList(username);
+            var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
+            return await _cookbookRepository.GetShoppingList(username, cookbookId);
         }
 
-        public async Task<bool> AddNewAdditonalItemsToCookbook(string username ,List<string> additionalItemsSaved, List<string> newItemsTosave)
+        public async Task<List<string>> FetchAdditonalItemsFromCosmos(string username)
         {
+            var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
+            return await _cookbookRepository.FetchAdditionalItemsFromShoppingLists(username, cookbookId);
+        }
 
-            bool changesMade = false;
-            if(newItemsTosave != null || newItemsTosave.Count > 0) {
-                foreach (var item in newItemsTosave) {
-                    if(!additionalItemsSaved.Contains(item))
-                    {
-                        additionalItemsSaved.Add(item);
-                        changesMade = true;
-                    }
-                }
-            }
-
-            //if true, update list in backend
-            if(changesMade)
-            {
-                //sort the list alphabetically
-                additionalItemsSaved.Sort(StringComparer.OrdinalIgnoreCase);
-
-                await _cookbookRepository.UpsertAdditionalItemsShoppingList(username, additionalItemsSaved);
-                return true;
-            }
-
-            return false;
+        public void ReplaceAdditionalItemsList(UserCookBook cookbook,List<string> latestList)
+        {
+            if(latestList.Count == 0 || latestList == null) cookbook.PreviouslyAddedAdditonalItems = new List<string>();
+                else cookbook.PreviouslyAddedAdditonalItems = latestList;  
         }
     }
 }

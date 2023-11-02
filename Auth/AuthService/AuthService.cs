@@ -31,7 +31,6 @@ namespace OrganizerApi.Auth.AuthService
         {
             List<Claim> claims = new List<Claim> {
                 new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Role, "Admin"),
                 new Claim(ClaimTypes.Role, "User"),
             };
 
@@ -42,7 +41,7 @@ namespace OrganizerApi.Auth.AuthService
 
             var token = new JwtSecurityToken(
                     claims: claims,
-                    expires: DateTime.Now.AddDays(1),
+                    expires: DateTime.Now.AddDays(7),
                     signingCredentials: creds
                 );
 

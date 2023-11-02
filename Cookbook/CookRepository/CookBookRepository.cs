@@ -2,6 +2,7 @@
 using OrganizerApi.Auth.Repository;
 using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
+using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
 using System.Net;
 
 namespace OrganizerApi.Cookbook.CookRepository
@@ -71,31 +72,34 @@ namespace OrganizerApi.Cookbook.CookRepository
             }
         }
 
-        public async Task<ShoppingListALLItems?> GetShoppingList(string username)
+        public async Task<SingleShopList?> GetShoppingList(string username, string cookbookId)
         {
-            // Define the SQL query to fetch the entire UserCookBook for the given username
-            var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";
-            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
+            // Define the SQL query
+            string sqlQueryText = @"
+                SELECT VALUE shopList
+                FROM c
+                JOIN shopList IN c.ShoppingLists
+                WHERE c.OwnerUsername = @ownerUsername AND shopList.ListName = 'Shopping list'";
 
-            FeedIterator<UserCookBook> queryResultSetIterator = container.GetItemQueryIterator<UserCookBook>(queryDefinition);
+            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText)
+                .WithParameter("@ownerUsername", username);
 
-            ShoppingListALLItems? shoppingListALLItems = null;
+            FeedIterator<SingleShopList> queryResultSetIterator = container.GetItemQueryIterator<SingleShopList>(
+                queryDefinition,
+                requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(cookbookId) }
+            );
 
-            // Iterate over the results (assuming a user will have only one UserCookBook)
             while (queryResultSetIterator.HasMoreResults)
             {
-                FeedResponse<UserCookBook> currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                foreach (UserCookBook cookbook in currentResultSet)
+                FeedResponse<SingleShopList> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                if (currentResultSet.Count > 0)
                 {
-                    shoppingListALLItems = new ShoppingListALLItems()
-                    {
-                        ShoppingList = cookbook.ShoppingList.FirstOrDefault(), // Assuming you want the first shopping list
-                        EarlierAddedAdditionalItems = cookbook.PreviouslyAddedAdditonalItems
-                    };
+                    // Assuming only one "Shopping list" per user, return the first one
+                    return currentResultSet.First();
                 }
             }
 
-            return shoppingListALLItems;
+            return null;
         }
 
         public async Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate)
@@ -112,8 +116,54 @@ namespace OrganizerApi.Cookbook.CookRepository
             userCookBook.PreviouslyAddedAdditonalItems = shoppinglistToUpdate;
             await UpdateCookBook(userCookBook);
             return true;
-
             
+        }
+
+        public async Task<List<string>> FetchAdditionalItemsFromShoppingLists(string username, string cookbookId)
+        {
+            string sqlQueryText = $"SELECT c.PreviouslyAddedAdditonalItems FROM c WHERE c.OwnerUsername = @username";
+
+            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText)
+                .WithParameter("@username", username);
+
+            List<string> previouslyAddedItems = new List<string>();
+            using (FeedIterator<dynamic> resultSetIterator = container.GetItemQueryIterator<dynamic>(
+            queryDefinition,
+            requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(cookbookId) }))
+                    {
+                        while (resultSetIterator.HasMoreResults)
+                        {
+                            FeedResponse<dynamic> response = await resultSetIterator.ReadNextAsync();
+                            foreach (var item in response)
+                            {
+                                if (item.PreviouslyAddedAdditonalItems != null)
+                                {
+                                    List<string> items = item.PreviouslyAddedAdditonalItems.ToObject<List<string>>();
+                                    previouslyAddedItems.AddRange(items);
+                                }
+                            }
+                        }
+                    }
+
+            return previouslyAddedItems;
+        }
+
+        public async Task<string> FetchUserCookbookId(string username)
+        {
+            //create sql to get coobook id from username
+            var sqlQueryText = $"SELECT VALUE c.id FROM c WHERE c.OwnerUsername = @ownerUsername";
+            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@ownerUsername", username);
+            using FeedIterator<string> resultSetIterator = container.GetItemQueryIterator<string>(queryDefinition);
+            if (resultSetIterator.HasMoreResults)
+            {
+                FeedResponse<string> response = await resultSetIterator.ReadNextAsync();
+                foreach (var id in response)
+                {
+                    return id;
+                }
+            }
+
+            return null; // Return null if no document was found
         }
     }
 }

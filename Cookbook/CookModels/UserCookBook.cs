@@ -1,4 +1,6 @@
-﻿namespace OrganizerApi.Cookbook.CookModels
+﻿using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
+
+namespace OrganizerApi.Cookbook.CookModels
 {
     public class UserCookBook
     {
@@ -6,7 +8,7 @@
         public required string OwnerUsername { get; set; }
         public List<Recipe> Recipes { get; set; } = new List<Recipe>();
 
-        public List<ShoppingList> ShoppingList { get; set; } = new List<ShoppingList>();
+        public List<SingleShopList> ShoppingLists { get; set; } = new List<SingleShopList>();
 
         public List<string> PreviouslyAddedAdditonalItems { get; set; } = new();
     }
