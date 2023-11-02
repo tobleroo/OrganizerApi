@@ -46,19 +46,19 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             }
         }
 
-        [HttpPost("shoppinglist")]
-        public async Task<ActionResult<List<ShoppingListRecipeDetails>>> CreateShoppingList([FromBody] List<ShoppingListDetailsDTO> recipiesToUse)
-        {
-            var name = User.FindFirstValue(ClaimTypes.Name);
-            var cookBook = await _cookbookRepository.GetCookBook(name);
-            if (cookBook == null)
-            {
-                return NotFound();
-            }
+        //[HttpPost("shoppinglist")]
+        //public async Task<ActionResult<List<ShoppingListRecipeDetails>>> CreateShoppingList([FromBody] List<ShoppingListDetailsDTO> recipiesToUse)
+        //{
+        //    var name = User.FindFirstValue(ClaimTypes.Name);
+        //    var cookBook = await _cookbookRepository.GetCookBook(name);
+        //    if (cookBook == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var finishedShoppingList = ShoppingListCreator.CreateShoppingList(recipiesToUse, cookBook.Recipes);
-            return Ok(finishedShoppingList);
-        }
+        //    var finishedShoppingList = ShoppingListCreator.CreateShoppingList(recipiesToUse, cookBook.Recipes);
+        //    return Ok(finishedShoppingList);
+        //}
 
         [HttpGet("specific-Meal-Gen-Recipe-Details")]
         public async Task<ActionResult<Dictionary<string, List<SpecificRecipeForMealGenDetails>>>> GetRecipeDetailsForSpecificGen()
