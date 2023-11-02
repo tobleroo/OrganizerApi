@@ -12,8 +12,12 @@ namespace OrganizerApi.Cookbook.CookRepository
         Task<UserCookBook> SaveNewCookBook(UserCookBook cookbook);
         Task<bool> UpdateCookBook(UserCookBook cookbook);
 
-        Task<SingleShopList?> GetShoppingList(string username);
+        Task<SingleShopList?> GetShoppingList(string username, string cookbookId);
 
         Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate);
+
+        Task<List<string>> FetchAdditionalItemsFromShoppingLists(string username, string cookbookId);
+
+        Task<string> FetchUserCookbookId(string username);
     }
 }

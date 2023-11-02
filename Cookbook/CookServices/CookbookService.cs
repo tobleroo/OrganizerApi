@@ -42,13 +42,14 @@ namespace OrganizerApi.Cookbook.CookServices
 
         }
 
-        public async Task<bool> UpdateShoppingListOfCookbook(string username, SingleShopList newShoppingList)
+        public async Task<bool> UpdateShoppingListOfCookbook(string username, ShoppingListPageDTO newShoppingList)
         {
             var cookbook = await _cookbookRepository.GetCookBook(username);
-            cookbook.ShoppingLists.RemoveAll(name => name.ListName == newShoppingList.ListName);
-            cookbook.ShoppingLists.Add(newShoppingList);
+            ReplaceAdditionalItemsList(cookbook, newShoppingList.AdditionalItems);
+            cookbook.ShoppingLists.RemoveAll(name => name.ListName == newShoppingList.SingleShopList.ListName);
+            cookbook.ShoppingLists.Add(newShoppingList.SingleShopList);
 
-            if (cookbook.ShoppingLists.Contains(newShoppingList))
+            if (cookbook.ShoppingLists.Contains(newShoppingList.SingleShopList))
             {
                 await _cookbookRepository.UpdateCookBook(cookbook);
                 return true;
@@ -96,33 +97,20 @@ namespace OrganizerApi.Cookbook.CookServices
 
         public async Task<SingleShopList> FetchShoppingList(string username)
         {
-            return await _cookbookRepository.GetShoppingList(username);
+            var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
+            return await _cookbookRepository.GetShoppingList(username, cookbookId);
         }
 
-        public async Task<bool> AddNewAdditonalItemsToCookbook(string username ,List<string> additionalItemsSaved, List<string> newItemsTosave)
+        public async Task<List<string>> FetchAdditonalItemsFromCosmos(string username)
         {
-            bool changesMade = false;
-            if(newItemsTosave != null || newItemsTosave.Count > 0) {
-                foreach (var item in newItemsTosave) {
-                    if(!additionalItemsSaved.Contains(item))
-                    {
-                        additionalItemsSaved.Add(item);
-                        changesMade = true;
-                    }
-                }
-            }
+            var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
+            return await _cookbookRepository.FetchAdditionalItemsFromShoppingLists(username, cookbookId);
+        }
 
-            //if true, update list in backend
-            if(changesMade)
-            {
-                //sort the list alphabetically
-                additionalItemsSaved.Sort(StringComparer.OrdinalIgnoreCase);
-
-                await _cookbookRepository.UpsertAdditionalItemsShoppingList(username, additionalItemsSaved);
-                return true;
-            }
-
-            return false;
+        public void ReplaceAdditionalItemsList(UserCookBook cookbook,List<string> latestList)
+        {
+            if(latestList.Count == 0 || latestList == null) cookbook.PreviouslyAddedAdditonalItems = new List<string>();
+                else cookbook.PreviouslyAddedAdditonalItems = latestList;  
         }
     }
 }

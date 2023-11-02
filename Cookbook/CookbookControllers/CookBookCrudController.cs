@@ -49,15 +49,22 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
         }
 
         [HttpGet("get-shoppinglist")]
-        public async Task<SingleShopList> RecieveShoppingList()
+        public async Task<ShoppingListPageDTO> RecieveShoppingList()
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
             var list = await _cookBookService.FetchShoppingList(name);
-            return list;
+            var additonalItems = await _cookBookService.FetchAdditonalItemsFromCosmos(name);
+            Console.WriteLine("size: " + additonalItems);
+            ShoppingListPageDTO shoppingPageData = new ShoppingListPageDTO()
+            {
+                SingleShopList = list,
+                AdditionalItems = additonalItems
+            };
+            return shoppingPageData;
         }
 
         [HttpPost("update-shoppinglist")]
-        public async Task<IActionResult> UpdateShopingListItems(SingleShopList updatedList)
+        public async Task<IActionResult> UpdateShopingListItems(ShoppingListPageDTO updatedList)
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
             var success = await _cookBookService.UpdateShoppingListOfCookbook(name, updatedList);
