@@ -54,7 +54,6 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             var name = User.FindFirstValue(ClaimTypes.Name);
             var list = await _cookBookService.FetchShoppingList(name);
             var additonalItems = await _cookBookService.FetchAdditonalItemsFromCosmos(name);
-            Console.WriteLine("size: " + additonalItems);
             ShoppingListPageDTO shoppingPageData = new ShoppingListPageDTO()
             {
                 SingleShopList = list,

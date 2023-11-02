@@ -145,8 +145,6 @@ namespace OrganizerApi.Cookbook.CookRepository
                         }
                     }
 
-            Console.WriteLine("size in repo: " + previouslyAddedItems.Count);
-
             return previouslyAddedItems;
         }
 
