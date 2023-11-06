@@ -47,34 +47,32 @@ namespace OrganizerApi.Cookbook.CookRepository
             return response.Resource;
         }
 
-        //create method to createor update a cookbook
+        //create or update a cookbook
         public async Task<bool> UpdateCookBook(UserCookBook cookbook)
         {
             try
             {
                 ItemResponse<UserCookBook> response = await container.UpsertItemAsync(cookbook, new PartitionKey(cookbook.id.ToString()));
 
-                // Check the status code to determine success or failure.
                 if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
                 {
-                    return true; // Operation succeeded
+                    return true;
                 }
                 else
                 {
-                    return false; // Operation failed
+                    return false;
                 }
             }
             catch (Exception ex)
             {
-                // Handle any exceptions here
                 Console.WriteLine($"An error occurred: {ex.Message}");
-                return false; // Operation failed due to an exception
+                return false; 
             }
         }
 
         public async Task<SingleShopList?> GetShoppingList(string username, string cookbookId)
         {
-            // Define the SQL query
+           
             string sqlQueryText = @"
                 SELECT VALUE shopList
                 FROM c
@@ -94,7 +92,6 @@ namespace OrganizerApi.Cookbook.CookRepository
                 FeedResponse<SingleShopList> currentResultSet = await queryResultSetIterator.ReadNextAsync();
                 if (currentResultSet.Count > 0)
                 {
-                    // Assuming only one "Shopping list" per user, return the first one
                     return currentResultSet.First();
                 }
             }
@@ -104,12 +101,10 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         public async Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate)
         {
-            // Step 1: Get the UserCookBook associated with the given username
             UserCookBook? userCookBook = await GetCookBook(username);
 
             if (userCookBook == null)
             {
-                // Handle the case where no UserCookBook exists for the given username
                 return false;
             }
 

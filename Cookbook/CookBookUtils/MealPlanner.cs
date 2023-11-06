@@ -2,11 +2,11 @@
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerBlazor.Models;
 
-namespace OrganizerApi.Cookbook.CookServices
+namespace OrganizerApi.Cookbook.CookBookUtils
 {
     public static class MealPlanner
     {
-        
+
         public static List<Recipe> CreateEasyMealPlan(List<RecipeRequestEasyDTO> desiredTypes, List<Recipe> userCookbook)
         {
 
@@ -17,21 +17,20 @@ namespace OrganizerApi.Cookbook.CookServices
             {
                 //filter for the requirement
                 var filteredCookbook = userCookbook
-                    .Where(recipe => 
-                    (recipe.CookTime <= desiredReqs.MaxCookTime) &&
-                    (desiredReqs.Difficulty ==  "Any" || recipe.Difficulty.ToString() == desiredReqs.Difficulty) &&
+                    .Where(recipe =>
+                    recipe.CookTime <= desiredReqs.MaxCookTime &&
+                    (desiredReqs.Difficulty == "Any" || recipe.Difficulty.ToString() == desiredReqs.Difficulty) &&
                     (desiredReqs.Category == "Any" || desiredReqs.Category == recipe.RecipeType.ToString()))
                     .ToList();
 
                 //add a random of the ones left in the list
-                
-                if(filteredCookbook.Count >= 1) {
+                if (filteredCookbook.Count >= 1)
+                {
                     int random = new Random().Next(0, filteredCookbook.Count);
                     result.Add(filteredCookbook[random]);
                 }
 
             }
-
             return result;
         }
 
@@ -49,7 +48,8 @@ namespace OrganizerApi.Cookbook.CookServices
                 List<SpecificRecipeForMealGenDetails> result = new();
                 foreach (var recipeCheck in cookbook.Recipes)
                 {
-                    if(recipeCheck.RecipeType.ToString() ==  recipeTypesToCheck[i]) {
+                    if (recipeCheck.RecipeType.ToString() == recipeTypesToCheck[i])
+                    {
                         var recippeDetailsDTO = new SpecificRecipeForMealGenDetails()
                         {
                             id = recipeCheck.Guid.ToString(),
@@ -62,7 +62,7 @@ namespace OrganizerApi.Cookbook.CookServices
             }
 
             return recipeList;
-            
+
         }
 
         public static List<Recipe> CreateSpecificMealPlan(List<RecipeRequestSpecificDTO> recipiesWanted, List<Recipe> cookbook)

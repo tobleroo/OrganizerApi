@@ -2,7 +2,7 @@
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
 
-namespace OrganizerApi.Cookbook.CookServices
+namespace OrganizerApi.Cookbook.CookBookUtils
 {
     public static class ShoppingListCreator
     {
@@ -43,13 +43,13 @@ namespace OrganizerApi.Cookbook.CookServices
         private static Ingredient ConvertIngrToNewPortionValue(int portionsWanted, Ingredient originalIngredient, int originalPortions)
         {
             //divide amount by original then multiply by new portions wanted
-            var newPortionsQuant = (originalIngredient.Quantity / originalPortions) * portionsWanted;
+            var newPortionsQuant = originalIngredient.Quantity / originalPortions * portionsWanted;
 
             return new Ingredient()
-                {
-                    Name = originalIngredient.Name,
-                    Quantity = newPortionsQuant,
-                    Unit = originalIngredient.Unit,
+            {
+                Name = originalIngredient.Name,
+                Quantity = newPortionsQuant,
+                Unit = originalIngredient.Unit,
             };
         }
 
