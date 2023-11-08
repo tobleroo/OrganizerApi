@@ -44,8 +44,12 @@ namespace OrganizerApi.Cookbook.CookbookControllers
             var name = User.FindFirstValue(ClaimTypes.Name);
             var cookBook = await _cookBookService.GetCookBook(name);
 
+            //run through additional items and check dates
+            _cookBookService.RecommendAdditionalItems(cookBook, shopList);
+
             //add recipes to current shoppinglist
             bool successfullyAddedRecipes = await _cookBookService.AddRecipesToShoppingList(cookBook, shopList);
+
 
             return successfullyAddedRecipes ? Ok() : BadRequest();
         }
@@ -55,11 +59,15 @@ namespace OrganizerApi.Cookbook.CookbookControllers
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
             var list = await _cookBookService.FetchShoppingList(name);
-            var additonalItems = await _cookBookService.FetchAdditonalItemsFromCosmos(name);
+            // var additonalItems = await _cookBookService.FetchAdditonalItemsFromCosmos(name);
+
+            var cookbook = await _cookBookService.GetCookBook(name);
+            var recommededAddItems = ShoppingListCreator.CheckIfItIsTimeToBuyAgain(cookbook.PreviouslyAddedAdditonalItems);
             ShoppingListPageDTO shoppingPageData = new ShoppingListPageDTO()
             {
                 SingleShopList = list,
-                AdditionalItems = additonalItems
+                AdditionalItems = list.AdditionalItems,
+                RecommendedAdditionalItems = recommededAddItems 
             };
             return shoppingPageData;
         }

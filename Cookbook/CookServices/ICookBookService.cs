@@ -16,6 +16,8 @@ namespace OrganizerApi.Cookbook.CookServices
         Task<SingleShopList> FetchShoppingList(string username);
 
         Task<bool> AddRecipesToShoppingList(UserCookBook cookbook,SingleShopList shoplistDetails);
-        Task<List<string>> FetchAdditonalItemsFromCosmos(string username);
+        //Task<List<string>> FetchAdditonalItemsFromCosmos(string username);
+
+        List<string> RecommendAdditionalItems(UserCookBook cookbook, SingleShopList shoplist);
     }
 }

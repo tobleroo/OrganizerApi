@@ -1,4 +1,5 @@
-﻿using OrganizerApi.Cookbook.CookModels;
+﻿using OrganizerApi.Cookbook.CookBookUtils;
+using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
 using OrganizerApi.Cookbook.CookRepository;
@@ -45,7 +46,12 @@ namespace OrganizerApi.Cookbook.CookServices
         public async Task<bool> UpdateShoppingListOfCookbook(string username, ShoppingListPageDTO newShoppingList)
         {
             var cookbook = await _cookbookRepository.GetCookBook(username);
-            ReplaceAdditionalItemsList(cookbook, newShoppingList.AdditionalItems);
+
+            //do the additional item stuffs before replacing the shoppinglist
+            ShoppingListCreator.AddDateToAdditionalItemLatestUse(cookbook, newShoppingList.SingleShopList);
+            var recommendedAddItems = ShoppingListCreator.CheckIfItIsTimeToBuyAgain(cookbook.PreviouslyAddedAdditonalItems);
+
+
             cookbook.ShoppingLists.RemoveAll(name => name.ListName == newShoppingList.SingleShopList.ListName);
             cookbook.ShoppingLists.Add(newShoppingList.SingleShopList);
 
@@ -101,16 +107,18 @@ namespace OrganizerApi.Cookbook.CookServices
             return await _cookbookRepository.GetShoppingList(username, cookbookId);
         }
 
-        public async Task<List<string>> FetchAdditonalItemsFromCosmos(string username)
-        {
-            var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
-            return await _cookbookRepository.FetchAdditionalItemsFromShoppingLists(username, cookbookId);
-        }
+        //public async Task<List<string>> FetchAdditonalItemsFromCosmos(string username)
+        //{
+        //    var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
+        //    return await _cookbookRepository.FetchAdditionalItemsFromShoppingLists(username, cookbookId);
+        //}
 
-        public void ReplaceAdditionalItemsList(UserCookBook cookbook,List<string> latestList)
+        public List<string> RecommendAdditionalItems(UserCookBook cookbook, SingleShopList shoplist)
         {
-            if(latestList.Count == 0 || latestList == null) cookbook.PreviouslyAddedAdditonalItems = new List<string>();
-                else cookbook.PreviouslyAddedAdditonalItems = latestList;  
+            List<string> items = new List<string>();
+            ShoppingListCreator.AddDateToAdditionalItemLatestUse(cookbook, shoplist);
+
+            return items;
         }
     }
 }

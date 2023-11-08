@@ -10,6 +10,6 @@ namespace OrganizerApi.Cookbook.CookModels
 
         public List<SingleShopList> ShoppingLists { get; set; } = new List<SingleShopList>();
 
-        public List<string> PreviouslyAddedAdditonalItems { get; set; } = new();
+        public List<AdditionalFoodItem> PreviouslyAddedAdditonalItems { get; set; } = new();
     }
 }
