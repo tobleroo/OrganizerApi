@@ -120,5 +120,17 @@ namespace OrganizerApi.Cookbook.CookServices
 
             return items;
         }
+
+        public async Task<List<RecipeOverviewData>> FetchRecipeOverviewData(string username)
+        {
+            //do the repo directly
+            return await _cookbookRepository.FetchRecipiesOverview(username);
+        }
+
+        public async Task<Recipe> GetOneRecipe(string username, string recipeId)
+        {
+            //do the repo directly 
+            return await _cookbookRepository.FetchOneRecipe(username, recipeId);
+        }
     }
 }

@@ -19,5 +19,8 @@ namespace OrganizerApi.Cookbook.CookServices
         //Task<List<string>> FetchAdditonalItemsFromCosmos(string username);
 
         List<string> RecommendAdditionalItems(UserCookBook cookbook, SingleShopList shoplist);
+        Task<List<RecipeOverviewData>> FetchRecipeOverviewData(string username);
+
+        Task<Recipe> GetOneRecipe(string username, string recipeId);
     }
 }

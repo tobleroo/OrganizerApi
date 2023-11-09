@@ -19,5 +19,9 @@ namespace OrganizerApi.Cookbook.CookRepository
         //Task<List<string>> FetchAdditionalItemsFromShoppingLists(string username, string cookbookId);
 
         Task<string> FetchUserCookbookId(string username);
+
+        Task<List<RecipeOverviewData>> FetchRecipiesOverview(string username);
+
+        Task<Recipe> FetchOneRecipe(string username, string recipeId);
     }
 }

@@ -160,5 +160,50 @@ namespace OrganizerApi.Cookbook.CookRepository
 
             return null; // Return null if no document was found
         }
+
+        public async Task<List<RecipeOverviewData>> FetchRecipiesOverview(string username)
+        {
+            var sqlQueryText = $"SELECT r.Guid AS Id, r.RecipeName AS Name, r.CookTime AS TimeToCook, r.RecipeType, r.Difficulty FROM c JOIN r IN c.Recipes WHERE c.OwnerUsername = @username";
+            var queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@username", username);
+            var queryResultSetIterator = container.GetItemQueryIterator<RecipeOverviewData>(queryDefinition);
+            var recipes = new List<RecipeOverviewData>();
+
+            while (queryResultSetIterator.HasMoreResults)
+            {
+                FeedResponse<RecipeOverviewData> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                foreach (RecipeOverviewData recipe in currentResultSet)
+                {
+                    recipes.Add(recipe);
+                }
+            }
+
+            return recipes;
+        }
+
+        public async Task<Recipe> FetchOneRecipe(string username, string recipeId)
+        {
+            var sqlQueryText = @"
+                SELECT VALUE r
+                FROM c
+                JOIN r IN c.Recipes
+                WHERE c.OwnerUsername = @username AND r.Guid = @recipeId";
+
+            var queryDefinition = new QueryDefinition(sqlQueryText)
+                .WithParameter("@username", username)
+                .WithParameter("@recipeId", recipeId);
+
+            var queryResultSetIterator = container.GetItemQueryIterator<Recipe>(queryDefinition);
+
+            if (queryResultSetIterator.HasMoreResults)
+            {
+                FeedResponse<Recipe> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                foreach (Recipe recipe in currentResultSet)
+                {
+                    return recipe;
+                }
+            }
+
+            return null; // If no recipe is found.
+        }
     }
 }

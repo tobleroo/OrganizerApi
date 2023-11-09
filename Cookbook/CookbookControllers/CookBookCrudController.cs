@@ -28,6 +28,15 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             return Ok(cookBook);
         }
 
+        [HttpGet("recipe-overview-data")]
+        public async Task<IActionResult> GetRecipiesOverviewData()
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+
+            var recipesOverviewData = await _cookBookService.FetchRecipeOverviewData(name);
+            return Ok(recipesOverviewData);
+        }
+
         [HttpPost("update-cookbook")]
         public async Task<IActionResult> UpdateCookBook(UserCookBook cookBook)
         {
@@ -35,8 +44,17 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             return result ? Ok() : BadRequest();
         }
 
-        
+        [HttpGet("get-one-recipe/{recipeId}")]
+        public async Task<IActionResult> GetSingleRecipe(string recipeId)
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
 
-        
+            Recipe recipeWanted = await _cookBookService.GetOneRecipe(name, recipeId);
+            return Ok(recipeWanted);
+        }
+
+
+
+
     }
 }
