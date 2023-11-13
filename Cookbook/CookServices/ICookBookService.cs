@@ -22,5 +22,9 @@ namespace OrganizerApi.Cookbook.CookServices
         Task<List<RecipeOverviewData>> FetchRecipeOverviewData(string username);
 
         Task<Recipe> GetOneRecipe(string username, string recipeId);
+
+        Task<bool> AddOneRecipeToCookbook(string username, Recipe recipe);
+
+        Task<bool> RemoveOneRecipeFromCookbook(string recipeId, string username);
     }
 }

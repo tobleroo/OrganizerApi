@@ -53,6 +53,23 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             return Ok(recipeWanted);
         }
 
+        [HttpPost("add-one-recipe")]
+        public async Task<IActionResult> AddOneRecipeToCookbook([FromBody]Recipe recipe)
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+
+            var success = await _cookBookService.AddOneRecipeToCookbook(name, recipe);
+            return success ? Ok() : BadRequest();
+        }
+
+        [HttpPost("remove-one-recipe")]
+        public async Task<IActionResult> RemoveOneRecipe([FromBody] string recipeId)
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var success = await _cookBookService.RemoveOneRecipeFromCookbook(recipeId, name);
+            return success ? Ok() : NotFound();
+        }
+
 
 
 

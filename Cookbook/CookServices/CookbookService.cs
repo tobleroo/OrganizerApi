@@ -132,5 +132,15 @@ namespace OrganizerApi.Cookbook.CookServices
             //do the repo directly 
             return await _cookbookRepository.FetchOneRecipe(username, recipeId);
         }
+
+        public async Task<bool> AddOneRecipeToCookbook(string username, Recipe recipe)
+        {
+            return await _cookbookRepository.SaveOneRecipe(username, recipe);
+        }
+
+        public async Task<bool> RemoveOneRecipeFromCookbook(string recipeId, string username)
+        {
+            return await _cookbookRepository.RemoveRecipeFromCookbook(recipeId, username);
+        }
     }
 }
