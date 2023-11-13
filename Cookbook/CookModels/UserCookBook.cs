@@ -8,7 +8,7 @@ namespace OrganizerApi.Cookbook.CookModels
         public required string OwnerUsername { get; set; }
         public List<Recipe> Recipes { get; set; } = new List<Recipe>();
 
-        public List<SingleShopList> ShoppingLists { get; set; } = new List<SingleShopList>();
+        public SingleShopList ShoppingList { get; set; } = new SingleShopList();
 
         public List<AdditionalFoodItem> PreviouslyAddedAdditonalItems { get; set; } = new();
     }

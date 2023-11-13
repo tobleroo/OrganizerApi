@@ -45,7 +45,8 @@ namespace OrganizerApi.Cookbook.CookbookControllers
             var cookBook = await _cookBookService.GetCookBook(name);
 
             //run through additional items and check dates
-            _cookBookService.RecommendAdditionalItems(cookBook, shopList);
+            //_cookBookService.RecommendAdditionalItems(cookBook, shopList);
+            cookBook = ShoppingListCreator.AddDateToAdditionalItemLatestUse(cookBook, shopList);
 
             //add recipes to current shoppinglist
             bool successfullyAddedRecipes = await _cookBookService.AddRecipesToShoppingList(cookBook, shopList);
@@ -58,15 +59,14 @@ namespace OrganizerApi.Cookbook.CookbookControllers
         public async Task<ShoppingListPageDTO> RecieveShoppingList()
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
-            var list = await _cookBookService.FetchShoppingList(name);
-            // var additonalItems = await _cookBookService.FetchAdditonalItemsFromCosmos(name);
 
             var cookbook = await _cookBookService.GetCookBook(name);
             var recommededAddItems = ShoppingListCreator.CheckIfItIsTimeToBuyAgain(cookbook.PreviouslyAddedAdditonalItems);
             ShoppingListPageDTO shoppingPageData = new ShoppingListPageDTO()
             {
-                SingleShopList = list,
-                AdditionalItems = list.AdditionalItems,
+                SingleShopList = cookbook.ShoppingList,
+                //this is separated for the blazor components, can change later
+                AdditionalItems = cookbook.ShoppingList.AdditionalItems,
                 RecommendedAdditionalItems = recommededAddItems
             };
             return shoppingPageData;

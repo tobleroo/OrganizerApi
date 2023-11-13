@@ -31,13 +31,12 @@ namespace OrganizerApi.Cookbook.CookServices
 
         public async Task<bool> AddRecipesToShoppingList(UserCookBook cookbook,SingleShopList shoplistDetails)
         {
-            //go through the cookbook 
-            var allShoppingLists = cookbook.ShoppingLists;
 
-            var originalShoplist = allShoppingLists.FirstOrDefault(shopplingList => shopplingList.ListName == shoplistDetails.ListName);
-
-            if(originalShoplist == null) cookbook.ShoppingLists.Add(shoplistDetails);
-                else originalShoplist.SingleShopListRecipes.AddRange(shoplistDetails.SingleShopListRecipes);
+            if (cookbook.ShoppingList == null) cookbook.ShoppingList = shoplistDetails;
+            else {
+                cookbook.ShoppingList.SingleShopListRecipes.AddRange(shoplistDetails.SingleShopListRecipes);
+                cookbook.ShoppingList.AdditionalItems.AddRange(shoplistDetails.AdditionalItems);
+            };
 
             return await UpdateCookbook(cookbook);
 
@@ -52,15 +51,9 @@ namespace OrganizerApi.Cookbook.CookServices
             var recommendedAddItems = ShoppingListCreator.CheckIfItIsTimeToBuyAgain(cookbook.PreviouslyAddedAdditonalItems);
 
 
-            cookbook.ShoppingLists.RemoveAll(name => name.ListName == newShoppingList.SingleShopList.ListName);
-            cookbook.ShoppingLists.Add(newShoppingList.SingleShopList);
+            cookbook.ShoppingList = newShoppingList.SingleShopList;
 
-            if (cookbook.ShoppingLists.Contains(newShoppingList.SingleShopList))
-            {
-                await _cookbookRepository.UpdateCookBook(cookbook);
-                return true;
-            }
-            return false;
+               return await _cookbookRepository.UpdateCookBook(cookbook);
         }
 
         public UserCookBook PopulateCookBookDemos(string username)

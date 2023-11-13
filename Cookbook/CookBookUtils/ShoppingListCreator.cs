@@ -53,47 +53,47 @@ namespace OrganizerApi.Cookbook.CookBookUtils
             };
         }
 
-        public static void AddDateToAdditionalItemLatestUse(UserCookBook cookbook, SingleShopList newShopList)
+        public static UserCookBook AddDateToAdditionalItemLatestUse(UserCookBook cookbook, SingleShopList newShopList)
         {
-            //go through all shoppinglists in cookbook and find the right one. 
-            SingleShopList? ShopListThing = null;
-
-            //find the right shoppinglist
-            foreach (var cookbookShoppingList in cookbook.ShoppingLists) {
-                if(cookbookShoppingList.ListName == newShopList.ListName)
-                {
-                    ShopListThing = cookbookShoppingList;
-                    break;
-                }            
-            }
-
-            //go through the old shoplist and see if any of the new things arent there already
-            foreach(var newAdditionalItem in newShopList.AdditionalItems)
+            
+            //go through cookbooks current shoppinglist to see if items from newshoplist doesnt exist already
+            if(newShopList.AdditionalItems.Count > 0)
             {
-                if (!ShopListThing.AdditionalItems.Contains(newAdditionalItem))
+                foreach(var item in newShopList.AdditionalItems)
                 {
-                    //check if item exists in cookbook additional items list
-                    var itemAlreadyExists = cookbook.PreviouslyAddedAdditonalItems.FirstOrDefault(addITem => addITem.Name == newAdditionalItem);
-                    
-                    if(itemAlreadyExists != null)
+                    //if item does not already exist
+                    if (!cookbook.ShoppingList.AdditionalItems.Contains(item))
                     {
-                        //add date to the object
-                        itemAlreadyExists.DatesWhenShopped.Add( CreateNewDate() );
-                    }
-                    else
-                    {
-                        //creat new addItem object and add to list with a current date
-                        AdditionalFoodItem addItemNew = new()
+                        bool doesExists = false;
+                        //create new date string
+                        var newDate = CreateNewDate();
+
+                        foreach(var addItem in cookbook.PreviouslyAddedAdditonalItems)
                         {
-                            Name = newAdditionalItem,
-                        };
+                            if (addItem.Name.Equals(item))
+                            {
+                                addItem.DatesWhenShopped.Add(newDate);
+                                doesExists = true;
+                                break;
+                            }
+                        }
 
-                        addItemNew.DatesWhenShopped.Add( CreateNewDate() );
+                        //if still false, create new additem
+                        if(doesExists == false)
+                        {
+                            AdditionalFoodItem newAddITem = new AdditionalFoodItem()
+                            {
+                                Name = item,
+                            };
 
-                        cookbook.PreviouslyAddedAdditonalItems.Add( addItemNew );
+                            newAddITem.DatesWhenShopped.Add(newDate);
+                            cookbook.PreviouslyAddedAdditonalItems.Add(newAddITem);
+                        }
+
                     }
                 }
             }
+            return cookbook;
         }
 
         private static string CreateNewDate()
@@ -106,15 +106,16 @@ namespace OrganizerApi.Cookbook.CookBookUtils
         {
             List<string> suggestedItemsToBuy = new();
 
-            //run through each item in the list
-            foreach (var addItem in additionalItem)
-            {
-                if (SeeIfItemShouldBeBoughtAgain(addItem))
+            if(additionalItem.Count > 0) {
+
+                foreach (var addItem in additionalItem)
                 {
-                    suggestedItemsToBuy.Add(addItem.Name);
+                    if (SeeIfItemShouldBeBoughtAgain(addItem))
+                    {
+                        suggestedItemsToBuy.Add(addItem.Name);
+                    }
                 }
             }
-
             return suggestedItemsToBuy;
         }
 
