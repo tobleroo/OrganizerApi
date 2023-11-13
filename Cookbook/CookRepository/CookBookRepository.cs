@@ -47,34 +47,32 @@ namespace OrganizerApi.Cookbook.CookRepository
             return response.Resource;
         }
 
-        //create method to createor update a cookbook
+        //create or update a cookbook
         public async Task<bool> UpdateCookBook(UserCookBook cookbook)
         {
             try
             {
                 ItemResponse<UserCookBook> response = await container.UpsertItemAsync(cookbook, new PartitionKey(cookbook.id.ToString()));
 
-                // Check the status code to determine success or failure.
                 if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Created)
                 {
-                    return true; // Operation succeeded
+                    return true;
                 }
                 else
                 {
-                    return false; // Operation failed
+                    return false;
                 }
             }
             catch (Exception ex)
             {
-                // Handle any exceptions here
                 Console.WriteLine($"An error occurred: {ex.Message}");
-                return false; // Operation failed due to an exception
+                return false; 
             }
         }
 
         public async Task<SingleShopList?> GetShoppingList(string username, string cookbookId)
         {
-            // Define the SQL query
+           
             string sqlQueryText = @"
                 SELECT VALUE shopList
                 FROM c
@@ -94,7 +92,6 @@ namespace OrganizerApi.Cookbook.CookRepository
                 FeedResponse<SingleShopList> currentResultSet = await queryResultSetIterator.ReadNextAsync();
                 if (currentResultSet.Count > 0)
                 {
-                    // Assuming only one "Shopping list" per user, return the first one
                     return currentResultSet.First();
                 }
             }
@@ -102,51 +99,49 @@ namespace OrganizerApi.Cookbook.CookRepository
             return null;
         }
 
-        public async Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate)
-        {
-            // Step 1: Get the UserCookBook associated with the given username
-            UserCookBook? userCookBook = await GetCookBook(username);
+        //public async Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate)
+        //{
+        //    UserCookBook? userCookBook = await GetCookBook(username);
 
-            if (userCookBook == null)
-            {
-                // Handle the case where no UserCookBook exists for the given username
-                return false;
-            }
+        //    if (userCookBook == null)
+        //    {
+        //        return false;
+        //    }
 
-            userCookBook.PreviouslyAddedAdditonalItems = shoppinglistToUpdate;
-            await UpdateCookBook(userCookBook);
-            return true;
+        //    userCookBook.PreviouslyAddedAdditonalItems = shoppinglistToUpdate;
+        //    await UpdateCookBook(userCookBook);
+        //    return true;
             
-        }
+        //}
 
-        public async Task<List<string>> FetchAdditionalItemsFromShoppingLists(string username, string cookbookId)
-        {
-            string sqlQueryText = $"SELECT c.PreviouslyAddedAdditonalItems FROM c WHERE c.OwnerUsername = @username";
+        //public async Task<List<string>> FetchAdditionalItemsFromShoppingLists(string username, string cookbookId)
+        //{
+        //    string sqlQueryText = $"SELECT c.PreviouslyAddedAdditonalItems FROM c WHERE c.OwnerUsername = @username";
 
-            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText)
-                .WithParameter("@username", username);
+        //    QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText)
+        //        .WithParameter("@username", username);
 
-            List<string> previouslyAddedItems = new List<string>();
-            using (FeedIterator<dynamic> resultSetIterator = container.GetItemQueryIterator<dynamic>(
-            queryDefinition,
-            requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(cookbookId) }))
-                    {
-                        while (resultSetIterator.HasMoreResults)
-                        {
-                            FeedResponse<dynamic> response = await resultSetIterator.ReadNextAsync();
-                            foreach (var item in response)
-                            {
-                                if (item.PreviouslyAddedAdditonalItems != null)
-                                {
-                                    List<string> items = item.PreviouslyAddedAdditonalItems.ToObject<List<string>>();
-                                    previouslyAddedItems.AddRange(items);
-                                }
-                            }
-                        }
-                    }
+        //    List<string> previouslyAddedItems = new List<string>();
+        //    using (FeedIterator<dynamic> resultSetIterator = container.GetItemQueryIterator<dynamic>(
+        //    queryDefinition,
+        //    requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(cookbookId) }))
+        //            {
+        //                while (resultSetIterator.HasMoreResults)
+        //                {
+        //                    FeedResponse<dynamic> response = await resultSetIterator.ReadNextAsync();
+        //                    foreach (var item in response)
+        //                    {
+        //                        if (item.PreviouslyAddedAdditonalItems != null)
+        //                        {
+        //                            List<string> items = item.PreviouslyAddedAdditonalItems.ToObject<List<string>>();
+        //                            previouslyAddedItems.AddRange(items);
+        //                        }
+        //                    }
+        //                }
+        //            }
 
-            return previouslyAddedItems;
-        }
+        //    return previouslyAddedItems;
+        //}
 
         public async Task<string> FetchUserCookbookId(string username)
         {
@@ -164,6 +159,51 @@ namespace OrganizerApi.Cookbook.CookRepository
             }
 
             return null; // Return null if no document was found
+        }
+
+        public async Task<List<RecipeOverviewData>> FetchRecipiesOverview(string username)
+        {
+            var sqlQueryText = $"SELECT r.Guid AS Id, r.RecipeName AS Name, r.CookTime AS TimeToCook, r.RecipeType, r.Difficulty FROM c JOIN r IN c.Recipes WHERE c.OwnerUsername = @username";
+            var queryDefinition = new QueryDefinition(sqlQueryText).WithParameter("@username", username);
+            var queryResultSetIterator = container.GetItemQueryIterator<RecipeOverviewData>(queryDefinition);
+            var recipes = new List<RecipeOverviewData>();
+
+            while (queryResultSetIterator.HasMoreResults)
+            {
+                FeedResponse<RecipeOverviewData> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                foreach (RecipeOverviewData recipe in currentResultSet)
+                {
+                    recipes.Add(recipe);
+                }
+            }
+
+            return recipes;
+        }
+
+        public async Task<Recipe> FetchOneRecipe(string username, string recipeId)
+        {
+            var sqlQueryText = @"
+                SELECT VALUE r
+                FROM c
+                JOIN r IN c.Recipes
+                WHERE c.OwnerUsername = @username AND r.Guid = @recipeId";
+
+            var queryDefinition = new QueryDefinition(sqlQueryText)
+                .WithParameter("@username", username)
+                .WithParameter("@recipeId", recipeId);
+
+            var queryResultSetIterator = container.GetItemQueryIterator<Recipe>(queryDefinition);
+
+            if (queryResultSetIterator.HasMoreResults)
+            {
+                FeedResponse<Recipe> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                foreach (Recipe recipe in currentResultSet)
+                {
+                    return recipe;
+                }
+            }
+
+            return null; // If no recipe is found.
         }
     }
 }

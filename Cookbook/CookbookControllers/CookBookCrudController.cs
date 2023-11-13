@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OrganizerApi.Cookbook.CookModels;
-using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
 using OrganizerApi.Cookbook.CookServices;
 using System.Security.Claims;
@@ -29,6 +28,15 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             return Ok(cookBook);
         }
 
+        [HttpGet("recipe-overview-data")]
+        public async Task<IActionResult> GetRecipiesOverviewData()
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+
+            var recipesOverviewData = await _cookBookService.FetchRecipeOverviewData(name);
+            return Ok(recipesOverviewData);
+        }
+
         [HttpPost("update-cookbook")]
         public async Task<IActionResult> UpdateCookBook(UserCookBook cookBook)
         {
@@ -36,38 +44,34 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             return result ? Ok() : BadRequest();
         }
 
-        [HttpPost("add-to-shoppinglist")]
-        public async Task<IActionResult> AddToShoppinglist([FromBody] SingleShopList shopList)
+        [HttpGet("get-one-recipe/{recipeId}")]
+        public async Task<IActionResult> GetSingleRecipe(string recipeId)
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
-            var cookBook = await _cookBookService.GetCookBook(name);
 
-            //add recipes to current shoppinglist
-            bool successfullyAddedRecipes = await _cookBookService.AddRecipesToShoppingList(cookBook,shopList);
-
-            return successfullyAddedRecipes ? Ok() : BadRequest();
+            Recipe recipeWanted = await _cookBookService.GetOneRecipe(name, recipeId);
+            return Ok(recipeWanted);
         }
 
-        [HttpGet("get-shoppinglist")]
-        public async Task<ShoppingListPageDTO> RecieveShoppingList()
+        [HttpPost("add-one-recipe")]
+        public async Task<IActionResult> AddOneRecipeToCookbook([FromBody]Recipe recipe)
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
-            var list = await _cookBookService.FetchShoppingList(name);
-            var additonalItems = await _cookBookService.FetchAdditonalItemsFromCosmos(name);
-            ShoppingListPageDTO shoppingPageData = new ShoppingListPageDTO()
-            {
-                SingleShopList = list,
-                AdditionalItems = additonalItems
-            };
-            return shoppingPageData;
+
+            var success = await _cookBookService.AddOneRecipeToCookbook(name, recipe);
+            return success ? Ok() : BadRequest();
         }
 
-        [HttpPost("update-shoppinglist")]
-        public async Task<IActionResult> UpdateShopingListItems(ShoppingListPageDTO updatedList)
+        [HttpPost("remove-one-recipe")]
+        public async Task<IActionResult> RemoveOneRecipe([FromBody] string recipeId)
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
-            var success = await _cookBookService.UpdateShoppingListOfCookbook(name, updatedList);
-            return Ok(success);
-        } 
+            var success = await _cookBookService.RemoveOneRecipeFromCookbook(recipeId, name);
+            return success ? Ok() : NotFound();
+        }
+
+
+
+
     }
 }

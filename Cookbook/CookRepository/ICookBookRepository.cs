@@ -14,10 +14,14 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         Task<SingleShopList?> GetShoppingList(string username, string cookbookId);
 
-        Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate);
+        //Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate);
 
-        Task<List<string>> FetchAdditionalItemsFromShoppingLists(string username, string cookbookId);
+        //Task<List<string>> FetchAdditionalItemsFromShoppingLists(string username, string cookbookId);
 
         Task<string> FetchUserCookbookId(string username);
+
+        Task<List<RecipeOverviewData>> FetchRecipiesOverview(string username);
+
+        Task<Recipe> FetchOneRecipe(string username, string recipeId);
     }
 }

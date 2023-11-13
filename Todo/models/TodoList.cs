@@ -11,11 +11,5 @@
             this.listName = listName;
             this.tasks = tasks;
         }
-
-        public TodoList()
-        {
-            this.listName = "Name not set";
-            this.tasks = new List<TodoTask>();
-        }
     }
 }
