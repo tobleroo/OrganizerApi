@@ -205,20 +205,5 @@ namespace OrganizerApi.Cookbook.CookRepository
 
             return null; // If no recipe is found.
         }
-
-        public async Task<bool> SaveOneRecipe(string username, Recipe recipe)
-        {
-            var cookbook = await GetCookBook(username);
-            cookbook.Recipes.Add(recipe);
-            return await UpdateCookBook(cookbook);
-        }
-
-        public async Task<bool> RemoveRecipeFromCookbook(string recipeId, string username)
-        {
-            var cookbook = await GetCookBook(username);
-            Console.WriteLine(recipeId);
-            cookbook.Recipes.RemoveAll(item => item.Guid.ToString().Equals(recipeId));
-            return await UpdateCookBook(cookbook);
-        }
     }
 }

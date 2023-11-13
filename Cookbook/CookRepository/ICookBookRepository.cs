@@ -23,9 +23,5 @@ namespace OrganizerApi.Cookbook.CookRepository
         Task<List<RecipeOverviewData>> FetchRecipiesOverview(string username);
 
         Task<Recipe> FetchOneRecipe(string username, string recipeId);
-
-        Task<bool> SaveOneRecipe(string username, Recipe recipe);
-
-        Task<bool> RemoveRecipeFromCookbook(string recipeId, string username);
     }
 }

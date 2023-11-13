@@ -67,7 +67,7 @@ namespace OrganizerApi.Cookbook.CookbookControllers
             {
                 SingleShopList = list,
                 AdditionalItems = list.AdditionalItems,
-                RecommendedAdditionalItems = recommededAddItems 
+                RecommendedAdditionalItems = recommededAddItems
             };
             return shoppingPageData;
         }

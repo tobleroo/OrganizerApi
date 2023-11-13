@@ -135,12 +135,27 @@ namespace OrganizerApi.Cookbook.CookServices
 
         public async Task<bool> AddOneRecipeToCookbook(string username, Recipe recipe)
         {
-            return await _cookbookRepository.SaveOneRecipe(username, recipe);
+            var cookbook = await _cookbookRepository.GetCookBook(username);
+
+            //check if recipe id exists in cookbook already 
+            // Find the index of the existing recipe
+            int index = cookbook.Recipes.FindIndex(r => r.Guid == recipe.Guid);
+
+            if (index != -1)
+            {
+                // Replace the existing recipe with the new one
+                cookbook.Recipes[index] = recipe;
+            }else cookbook.Recipes.Add(recipe);
+
+            return await _cookbookRepository.UpdateCookBook(cookbook);
+
         }
 
         public async Task<bool> RemoveOneRecipeFromCookbook(string recipeId, string username)
         {
-            return await _cookbookRepository.RemoveRecipeFromCookbook(recipeId, username);
+            var cookbook = await _cookbookRepository.GetCookBook(username);
+            cookbook.Recipes.RemoveAll(item => item.Guid.ToString().Equals(recipeId));
+            return await _cookbookRepository.UpdateCookBook(cookbook);
         }
     }
 }
