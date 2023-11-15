@@ -12,10 +12,28 @@ using OrganizerApi.Todo.service;
 using OrganizerApi.Todo.Repository;
 using OrganizerApi.Cookbook.CookRepository;
 using OrganizerApi.Cookbook.CookServices;
+using OrganizerApi.Cookbook.Config;
+using OrganizerApi.Auth.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Build configuration
+IConfiguration configuration = new ConfigurationBuilder()
+    .SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .Build();
+
+// Configure Cosmos DB settings
+var cosmosDbCookbookConfig = new CookbookConfigDTO();
+configuration.GetSection("CosmosDBCookbook").Bind(cosmosDbCookbookConfig);
+
+var cosmosDbAuthConfig = new AuthConfigDTO();
+configuration.GetSection("CosmosDBAuth").Bind(cosmosDbAuthConfig);
+
+builder.Services.AddSingleton(cosmosDbCookbookConfig);  // Register CosmosDbConfiguration as singleton
+builder.Services.AddSingleton(cosmosDbAuthConfig);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -67,6 +85,8 @@ builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 builder.Services.AddScoped<ICookBookRepository, CookBookRepository>();
 builder.Services.AddScoped<ICookBookService, CookbookService>();
+builder.Services.AddScoped<IMealService, MealService>();
+builder.Services.AddScoped<IShoppinglistService, ShoppinglistService>();
 
 var app = builder.Build();
 

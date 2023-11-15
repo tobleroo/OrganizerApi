@@ -4,6 +4,7 @@ using OrganizerApi.Cookbook.CookBookUtils;
 using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerApi.Cookbook.CookRepository;
+using OrganizerApi.Cookbook.CookServices;
 using OrganizerBlazor.Models;
 using System.Security.Claims;
 
@@ -16,34 +17,31 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
     {
 
         //get cookbook repository
-        private readonly ICookBookRepository _cookbookRepository;
+        private readonly IMealService _mealService;
 
-        public MealPlanerController(ICookBookRepository cookBookRepository)
+        public MealPlanerController(IMealService mealService)
         {
-            _cookbookRepository = cookBookRepository;
+            _mealService = mealService;
         }
 
         [HttpPost("easy")]
         public async Task<ActionResult<List<Recipe>>> CreateEasyMealPLan([FromBody] List<RecipeRequestEasyDTO> desiredRecipeTypes)
         {
+            var name = User.FindFirstValue(ClaimTypes.Name);
             try
             {
-                //get user name
-                var name = User.FindFirstValue(ClaimTypes.Name);
-                var cookBook = await _cookbookRepository.GetCookBook(name);
-                if (cookBook == null)
-                {
-                    return NotFound();
-                }
+                var mealplan = await _mealService.GenerateEasyMealPlan(name, desiredRecipeTypes);
 
-                //send the list of required recipes and the cookbook to the method
-                var mealplan = MealPlanner.CreateEasyMealPlan(desiredRecipeTypes, cookBook.Recipes);
-                return Ok(mealplan);
-            }
-            catch (Exception ex)
-            {
-                // Handle the exception and return an appropriate response
-                return BadRequest("An error occurred: " + ex.Message);
+                if (mealplan.Any()) return Ok(mealplan); // Return the meal plan
+
+                else return NotFound("No recipes found for the specified criteria.");
+
+            }catch (InvalidOperationException ex){
+                return BadRequest(ex.Message);
+
+            }catch (Exception ex){
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred."+ ex);
+
             }
         }
 
@@ -51,14 +49,18 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
         public async Task<ActionResult<Dictionary<string, List<SpecificRecipeForMealGenDetails>>>> GetRecipeDetailsForSpecificGen()
         {
             var name = User.FindFirstValue(ClaimTypes.Name);
-            var cookBook = await _cookbookRepository.GetCookBook(name);
-            if (cookBook == null)
+            try
             {
-                return NotFound();
+                var listOfRecipeNamesAndCetogories = _mealService.GetRecipeNamesForSpecificGenerator(name);
+                return Ok(listOfRecipeNamesAndCetogories);
+            } catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
+            }catch(Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred." + ex.Message);
             }
-
-            var recipeNamesList = MealPlanner.CreateRecipeListForSepcificGenerator(cookBook);
-            return Ok(recipeNamesList);
+            
         }
 
         [HttpPost("specific")]
@@ -67,15 +69,10 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             {
                 //get user name
                 var name = User.FindFirstValue(ClaimTypes.Name);
-                var cookBook = await _cookbookRepository.GetCookBook(name);
-                if (cookBook == null)
-                {
-                    return NotFound();
-                }
 
+                var mealPlan = await _mealService.GenerateSpecficMealPlan(name, specificRecipesWanted);
                 //send the list of required recipes and the cookbook to the method
-                var mealplan = MealPlanner.CreateSpecificMealPlan(specificRecipesWanted, cookBook.Recipes);
-                return Ok(mealplan);
+                return Ok(mealPlan);
             }
             catch (Exception ex)
             {

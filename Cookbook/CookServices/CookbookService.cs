@@ -16,103 +16,63 @@ namespace OrganizerApi.Cookbook.CookServices
             _cookbookRepository = cookBookRepository;
         }
 
-        public void AddRecipe(Recipe recipe)
-        { }
+        //public void AddRecipe(Recipe recipe)
+        //{ }
 
         public async Task<UserCookBook> GetCookBook(string username)
         {
-            var cookBook = await _cookbookRepository.GetCookBook(username);
-            if (cookBook == null)
-            {
-                //return await _cookbookRepository.SaveNewCookBook(PopulateCookBookDemos(username));
-            }
-            return cookBook;
+            return await _cookbookRepository.GetCookBook(username);
         }
 
-        public async Task<bool> AddRecipesToShoppingList(UserCookBook cookbook,SingleShopList shoplistDetails)
-        {
+        //public UserCookBook PopulateCookBookDemos(string username)
+        //{
+        //    var newCookBook = new UserCookBook { OwnerUsername = username};
 
-            if (cookbook.ShoppingList == null) cookbook.ShoppingList = shoplistDetails;
-            else {
-                cookbook.ShoppingList.SingleShopListRecipes.AddRange(shoplistDetails.SingleShopListRecipes);
-                cookbook.ShoppingList.AdditionalItems.AddRange(shoplistDetails.AdditionalItems);
-            };
+        //    //create 2 ingredients
+        //    var ingredient1 = new Ingredient { Name = "Chicken Breast", Quantity = 2, Unit = "lbs" };
+        //    var ingredient2 = new Ingredient { Name = "Pasta", Quantity = 1, Unit = "lbs" };
 
-            return await UpdateCookbook(cookbook);
+        //    var recipe = new Recipe { RecipeName = "Chicken Parmesan" };
+        //    //set recipe ingredient list with created ingredients
+        //    recipe.Ingredients.Add(ingredient1);
+        //    recipe.Ingredients.Add(ingredient2);
 
-        }
+        //    newCookBook.Recipes.Add(recipe);
+        //    // create more recipes
+        //    var recipe2 = new Recipe { RecipeName = "Chicken Alfredo" };
+        //    recipe2.Ingredients.Add(ingredient1);
+        //    recipe2.Ingredients.Add(ingredient2);
+        //    newCookBook.Recipes.Add(recipe2);
 
-        public async Task<bool> UpdateShoppingListOfCookbook(string username, ShoppingListPageDTO newShoppingList)
-        {
-            var cookbook = await _cookbookRepository.GetCookBook(username);
+        //    var recipe3 = new Recipe { RecipeName = "carbonara" };
+        //    recipe3.Ingredients.Add(ingredient1);
+        //    recipe3.Ingredients.Add(ingredient2);
+        //    newCookBook.Recipes.Add(recipe3);
 
-            //do the additional item stuffs before replacing the shoppinglist
-            ShoppingListCreator.AddDateToAdditionalItemLatestUse(cookbook, newShoppingList.SingleShopList);
-            var recommendedAddItems = ShoppingListCreator.CheckIfItIsTimeToBuyAgain(cookbook.PreviouslyAddedAdditonalItems);
+        //    var recipe4 = new Recipe { RecipeName = "meatloaf" };
+        //    recipe4.Ingredients.Add(ingredient1);
+        //    recipe4.Ingredients.Add(ingredient2);
+        //    newCookBook.Recipes.Add(recipe4);
 
-
-            cookbook.ShoppingList = newShoppingList.SingleShopList;
-
-               return await _cookbookRepository.UpdateCookBook(cookbook);
-        }
-
-        public UserCookBook PopulateCookBookDemos(string username)
-        {
-            var newCookBook = new UserCookBook { OwnerUsername = username};
-
-            //create 2 ingredients
-            var ingredient1 = new Ingredient { Name = "Chicken Breast", Quantity = 2, Unit = "lbs" };
-            var ingredient2 = new Ingredient { Name = "Pasta", Quantity = 1, Unit = "lbs" };
-
-            var recipe = new Recipe { RecipeName = "Chicken Parmesan" };
-            //set recipe ingredient list with created ingredients
-            recipe.Ingredients.Add(ingredient1);
-            recipe.Ingredients.Add(ingredient2);
-
-            newCookBook.Recipes.Add(recipe);
-            // create more recipes
-            var recipe2 = new Recipe { RecipeName = "Chicken Alfredo" };
-            recipe2.Ingredients.Add(ingredient1);
-            recipe2.Ingredients.Add(ingredient2);
-            newCookBook.Recipes.Add(recipe2);
-
-            var recipe3 = new Recipe { RecipeName = "carbonara" };
-            recipe3.Ingredients.Add(ingredient1);
-            recipe3.Ingredients.Add(ingredient2);
-            newCookBook.Recipes.Add(recipe3);
-
-            var recipe4 = new Recipe { RecipeName = "meatloaf" };
-            recipe4.Ingredients.Add(ingredient1);
-            recipe4.Ingredients.Add(ingredient2);
-            newCookBook.Recipes.Add(recipe4);
-
-            return newCookBook;
-        }
+        //    return newCookBook;
+        //}
 
         public async Task<bool> UpdateCookbook(UserCookBook cookbook)
         {
             return await _cookbookRepository.UpdateCookBook(cookbook);
         }
 
-        public async Task<SingleShopList> FetchShoppingList(string username)
-        {
-            var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
-            return await _cookbookRepository.GetShoppingList(username, cookbookId);
-        }
+        //public async Task<SingleShopList> FetchShoppingList(string username)
+        //{
+        //    var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
+        //    return await _cookbookRepository.GetShoppingList(username, cookbookId);
+        //}
 
         //public async Task<List<string>> FetchAdditonalItemsFromCosmos(string username)
         //{
         //    var cookbookId = await _cookbookRepository.FetchUserCookbookId(username);
         //    return await _cookbookRepository.FetchAdditionalItemsFromShoppingLists(username, cookbookId);
         //}
-
-        public List<string> RecommendAdditionalItems(UserCookBook cookbook, SingleShopList shoplist)
-        {
-            List<string> items = new List<string>();
-            ShoppingListCreator.AddDateToAdditionalItemLatestUse(cookbook, shoplist);
-
-            return items;
-        }
 
         public async Task<List<RecipeOverviewData>> FetchRecipeOverviewData(string username)
         {
@@ -128,6 +88,8 @@ namespace OrganizerApi.Cookbook.CookServices
 
         public async Task<bool> AddOneRecipeToCookbook(string username, Recipe recipe)
         {
+
+            
             var cookbook = await _cookbookRepository.GetCookBook(username);
 
             //check if recipe id exists in cookbook already 

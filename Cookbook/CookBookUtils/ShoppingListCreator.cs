@@ -7,38 +7,38 @@ namespace OrganizerApi.Cookbook.CookBookUtils
     public static class ShoppingListCreator
     {
 
-        public static List<ShoppingListRecipeDetails> CreateShoppingList(List<ShoppingListDetailsDTO> wantedRecipies, List<Recipe> userCookbook)
-        {
+        //public static List<ShoppingListRecipeDetails> CreateShoppingList(List<ShoppingListDetailsDTO> wantedRecipies, List<Recipe> userCookbook)
+        //{
 
-            List<ShoppingListRecipeDetails> shoppingList = new();
+        //    List<ShoppingListRecipeDetails> shoppingList = new();
 
-            foreach (var item in wantedRecipies)
-            {
-                foreach (var recipe in userCookbook)
-                {
-                    if (recipe.RecipeName == item.RecipeName)
-                    {
-                        List<Ingredient> updatedListToNewPortionSize = new List<Ingredient>();
+        //    foreach (var item in wantedRecipies)
+        //    {
+        //        foreach (var recipe in userCookbook)
+        //        {
+        //            if (recipe.RecipeName == item.RecipeName)
+        //            {
+        //                List<Ingredient> updatedListToNewPortionSize = new List<Ingredient>();
 
-                        foreach (var ingredient in recipe.Ingredients)
-                        {
-                            var updatedDataToIngredient = ConvertIngrToNewPortionValue(item.PortionsAmount, ingredient, recipe.Portions);
-                            updatedListToNewPortionSize.Add(updatedDataToIngredient);
-                        }
+        //                foreach (var ingredient in recipe.Ingredients)
+        //                {
+        //                    var updatedDataToIngredient = ConvertIngrToNewPortionValue(item.PortionsAmount, ingredient, recipe.Portions);
+        //                    updatedListToNewPortionSize.Add(updatedDataToIngredient);
+        //                }
 
-                        var ShoppingListItem = new ShoppingListRecipeDetails()
-                        {
-                            RecipeName = item.RecipeName,
-                            Ingredients = updatedListToNewPortionSize
-                        };
+        //                var ShoppingListItem = new ShoppingListRecipeDetails()
+        //                {
+        //                    RecipeName = item.RecipeName,
+        //                    Ingredients = updatedListToNewPortionSize
+        //                };
 
-                        shoppingList.Add(ShoppingListItem);
-                    }
-                }
-            }
+        //                shoppingList.Add(ShoppingListItem);
+        //            }
+        //        }
+        //    }
 
-            return shoppingList;
-        }
+        //    return shoppingList;
+        //}
 
         private static Ingredient ConvertIngrToNewPortionValue(int portionsWanted, Ingredient originalIngredient, int originalPortions)
         {
@@ -55,45 +55,41 @@ namespace OrganizerApi.Cookbook.CookBookUtils
 
         public static UserCookBook AddDateToAdditionalItemLatestUse(UserCookBook cookbook, SingleShopList newShopList)
         {
-            
-            //go through cookbooks current shoppinglist to see if items from newshoplist doesnt exist already
-            if(newShopList.AdditionalItems.Count > 0)
+
+            if (newShopList.AdditionalItems.Count == 0)
             {
-                foreach(var item in newShopList.AdditionalItems)
-                {
-                    //if item does not already exist
-                    if (!cookbook.ShoppingList.AdditionalItems.Contains(item))
-                    {
-                        bool doesExists = false;
-                        //create new date string
-                        var newDate = CreateNewDate();
-
-                        foreach(var addItem in cookbook.PreviouslyAddedAdditonalItems)
-                        {
-                            if (addItem.Name.Equals(item))
-                            {
-                                addItem.DatesWhenShopped.Add(newDate);
-                                doesExists = true;
-                                break;
-                            }
-                        }
-
-                        //if still false, create new additem
-                        if(doesExists == false)
-                        {
-                            AdditionalFoodItem newAddITem = new AdditionalFoodItem()
-                            {
-                                Name = item,
-                            };
-
-                            newAddITem.DatesWhenShopped.Add(newDate);
-                            cookbook.PreviouslyAddedAdditonalItems.Add(newAddITem);
-                        }
-
-                    }
-                }
+                return cookbook;
             }
+
+            var newDate = CreateNewDate();
+
+            foreach (var item in newShopList.AdditionalItems.Where(item => !cookbook.ShoppingList.AdditionalItems.Contains(item)))
+            {
+                UpdateOrCreateAdditionalItem(cookbook, item, newDate);
+            }
+
             return cookbook;
+
+        }
+
+        private static void UpdateOrCreateAdditionalItem(UserCookBook cookbook, string item, string newDate)
+        {
+            var existingItem = cookbook.PreviouslyAddedAdditonalItems.FirstOrDefault(addItem => addItem.Name.Equals(item));
+
+            if (existingItem != null)
+            {
+                existingItem.DatesWhenShopped.Add(newDate);
+            }
+            else
+            {
+                var newAddItem = new AdditionalFoodItem
+                {
+                    Name = item,
+                    DatesWhenShopped = new List<string> { newDate }
+                };
+
+                cookbook.PreviouslyAddedAdditonalItems.Add(newAddItem);
+            }
         }
 
         private static string CreateNewDate()
@@ -122,41 +118,24 @@ namespace OrganizerApi.Cookbook.CookBookUtils
         private static bool SeeIfItemShouldBeBoughtAgain(AdditionalFoodItem additionalItem)
         {
 
-            List<DateTime> dates = new List<DateTime>();
-            int totalDays = 0;
-
-            if( additionalItem.DatesWhenShopped.Count > 2 ) { 
-                for (int i = 0; i < additionalItem.DatesWhenShopped.Count; i++)
-                {
-                    dates.Add(DateTime.Parse(additionalItem.DatesWhenShopped[i]));
-                }
-
-                //compare diff between each date 
-
-                for(int j = dates.Count - 1; j >= 1; j--) {
-                    var timeSpan = dates[j - 1].Subtract(dates[j]);
-                    totalDays += timeSpan.Days;
-                }
-
-                //divide total days by how many times item has been shopped.
-                int averageDays = totalDays / additionalItem.DatesWhenShopped.Count;
-
-                //check if its been more than averagedays since last time
-                //get latest date
-                var latestDateShopped = dates[dates.Count - 1];
-                //get todays date and subtract to latest to get diff
-                var todaysDate = DateTime.Now;
-
-                var amountDaysSinceLastTime = todaysDate.Subtract(latestDateShopped);
-
-                int sinceLastTimeDays =amountDaysSinceLastTime.Days;
-
-                if(sinceLastTimeDays >= averageDays)
-                {
-                    return true;
-                }
+            if (additionalItem.DatesWhenShopped.Count < 3)
+            {
+                return false;
             }
-            return false;
+
+            List<DateTime> dates = additionalItem.DatesWhenShopped.Select(date => DateTime.Parse(date)).ToList();
+
+            //skip is there to make sure it is n-1 and not get out of bounds exception
+            int totalDays = dates.Zip(dates.Skip(1), (date1, date2) => (int)(date2 - date1).TotalDays).Sum();
+
+            int averageDays = totalDays / (additionalItem.DatesWhenShopped.Count - 1);
+
+            DateTime latestDateShopped = dates.Last();
+            DateTime todaysDate = DateTime.Now;
+
+            int sinceLastTimeDays = (int)(todaysDate - latestDateShopped).TotalDays;
+
+            return sinceLastTimeDays >= averageDays;
         }
 
     }

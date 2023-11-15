@@ -9,7 +9,7 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         Task<UserCookBook> GetCookBook(string id);
 
-        Task<UserCookBook> SaveNewCookBook(UserCookBook cookbook);
+        //Task<UserCookBook> SaveNewCookBook(UserCookBook cookbook);
         Task<bool> UpdateCookBook(UserCookBook cookbook);
 
         Task<SingleShopList?> GetShoppingList(string username, string cookbookId);

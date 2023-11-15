@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos;
 using OrganizerApi.Auth.Repository;
+using OrganizerApi.Cookbook.Config;
 using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
@@ -12,40 +13,48 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         private Container container;
 
-        public CookBookRepository() => InitializeContainerAsync().Wait();
-
-        private async Task InitializeContainerAsync()
+        public CookBookRepository(CookbookConfigDTO cosmosDbConfig)
         {
-            var conn = new DbConnection("https://localhost:8081", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
-                "Organizer", "cookbook");
-            container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
+            InitializeContainerAsync(cosmosDbConfig).Wait();
+        }
+
+        private async Task InitializeContainerAsync(CookbookConfigDTO config)
+        {
+            var conn = new DbConnection(config.EndpointUri, config.PrimaryKey, config.DatabaseId, config.ContainerId);
+            container = await conn.GetContainer();
         }
 
         public async Task<UserCookBook>? GetCookBook(string username)
         {
-            //retrieve the cookbook from the database using the username
-            var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";
-            QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-            FeedIterator<UserCookBook> queryResultSetIterator = container.GetItemQueryIterator<UserCookBook>(queryDefinition);
-
-            //iterate over the results and return the first one
-            while (queryResultSetIterator.HasMoreResults)
+            try
             {
-                FeedResponse<UserCookBook> currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                foreach (UserCookBook userCookBook in currentResultSet)
+                var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";
+                QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
+                FeedIterator<UserCookBook> queryResultSetIterator = container.GetItemQueryIterator<UserCookBook>(queryDefinition);
+
+                while (queryResultSetIterator.HasMoreResults)
                 {
-                    return userCookBook;
+                    FeedResponse<UserCookBook> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                    foreach (UserCookBook userCookBook in currentResultSet)
+                    {
+                        return userCookBook;
+                    }
                 }
+
+                return null;
             }
-            return null;
-           
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error in GetCookBook repository method", ex);
+            }
+
         }
 
-        public async Task<UserCookBook> SaveNewCookBook(UserCookBook cookbook)
-        {
-            ItemResponse<UserCookBook> response = await container.CreateItemAsync(cookbook, new PartitionKey(cookbook.id.ToString()));
-            return response.Resource;
-        }
+        //public async Task<UserCookBook> SaveNewCookBook(UserCookBook cookbook)
+        //{
+        //    ItemResponse<UserCookBook> response = await container.CreateItemAsync(cookbook, new PartitionKey(cookbook.id.ToString()));
+        //    return response.Resource;
+        //}
 
         //create or update a cookbook
         public async Task<bool> UpdateCookBook(UserCookBook cookbook)
@@ -65,8 +74,8 @@ namespace OrganizerApi.Cookbook.CookRepository
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                return false; 
+                // Log the exception or handle it as needed
+                throw new ApplicationException("Error in UpdateCookBook repository method", ex);
             }
         }
 
@@ -182,28 +191,36 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         public async Task<Recipe> FetchOneRecipe(string username, string recipeId)
         {
-            var sqlQueryText = @"
+            try
+            {
+                var sqlQueryText = @"
                 SELECT VALUE r
                 FROM c
                 JOIN r IN c.Recipes
                 WHERE c.OwnerUsername = @username AND r.Guid = @recipeId";
 
-            var queryDefinition = new QueryDefinition(sqlQueryText)
-                .WithParameter("@username", username)
-                .WithParameter("@recipeId", recipeId);
+                var queryDefinition = new QueryDefinition(sqlQueryText)
+                    .WithParameter("@username", username)
+                    .WithParameter("@recipeId", recipeId);
 
-            var queryResultSetIterator = container.GetItemQueryIterator<Recipe>(queryDefinition);
+                var queryResultSetIterator = container.GetItemQueryIterator<Recipe>(queryDefinition);
 
-            if (queryResultSetIterator.HasMoreResults)
-            {
-                FeedResponse<Recipe> currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                foreach (Recipe recipe in currentResultSet)
+                if (queryResultSetIterator.HasMoreResults)
                 {
-                    return recipe;
+                    FeedResponse<Recipe> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                    foreach (Recipe recipe in currentResultSet)
+                    {
+                        return recipe;
+                    }
                 }
-            }
 
-            return null; // If no recipe is found.
+                return null; // If no recipe is found.
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as needed
+                throw new ApplicationException("Error in FetchOneRecipe method", ex);
+            }
         }
     }
 }

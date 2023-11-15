@@ -1,5 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
+using OrganizerApi.Auth.Config;
 using OrganizerApi.Auth.models;
+using OrganizerApi.Cookbook.Config;
 
 namespace OrganizerApi.Auth.Repository
 {
@@ -8,13 +10,15 @@ namespace OrganizerApi.Auth.Repository
 
         private Container container;
 
-        public UserRepository() => InitializeContainerAsync().Wait();
-
-        private async Task InitializeContainerAsync()
+        public UserRepository(AuthConfigDTO config)
         {
-            var conn = new DbConnection("https://tobleroo.documents.azure.com:443/", "8xGGAueMy7XRGYeCA8nj2mwZ6w0gDhNffoIeaWDIHdC7dMfjTght7zdQAv9zs7gZvAWM2nUMhernACDbozvSMg==",
-                "Organizer", "Users");
-            container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
+            InitializeContainerAsync(config).Wait();
+        }
+
+        private async Task InitializeContainerAsync(AuthConfigDTO config)
+        {
+            var conn = new DbConnection(config.EndpointUri, config.PrimaryKey, config.DatabaseId, config.ContainerId);
+            container = await conn.GetContainer();
         }
 
         public async Task<AppUser> GetUser(string id)
