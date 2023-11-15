@@ -50,12 +50,6 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         }
 
-        //public async Task<UserCookBook> SaveNewCookBook(UserCookBook cookbook)
-        //{
-        //    ItemResponse<UserCookBook> response = await container.CreateItemAsync(cookbook, new PartitionKey(cookbook.id.ToString()));
-        //    return response.Resource;
-        //}
-
         //create or update a cookbook
         public async Task<bool> UpdateCookBook(UserCookBook cookbook)
         {
@@ -107,51 +101,6 @@ namespace OrganizerApi.Cookbook.CookRepository
 
             return null;
         }
-
-        //public async Task<bool> UpsertAdditionalItemsShoppingList(string username, List<string> shoppinglistToUpdate)
-        //{
-        //    UserCookBook? userCookBook = await GetCookBook(username);
-
-        //    if (userCookBook == null)
-        //    {
-        //        return false;
-        //    }
-
-        //    userCookBook.PreviouslyAddedAdditonalItems = shoppinglistToUpdate;
-        //    await UpdateCookBook(userCookBook);
-        //    return true;
-            
-        //}
-
-        //public async Task<List<string>> FetchAdditionalItemsFromShoppingLists(string username, string cookbookId)
-        //{
-        //    string sqlQueryText = $"SELECT c.PreviouslyAddedAdditonalItems FROM c WHERE c.OwnerUsername = @username";
-
-        //    QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText)
-        //        .WithParameter("@username", username);
-
-        //    List<string> previouslyAddedItems = new List<string>();
-        //    using (FeedIterator<dynamic> resultSetIterator = container.GetItemQueryIterator<dynamic>(
-        //    queryDefinition,
-        //    requestOptions: new QueryRequestOptions() { PartitionKey = new PartitionKey(cookbookId) }))
-        //            {
-        //                while (resultSetIterator.HasMoreResults)
-        //                {
-        //                    FeedResponse<dynamic> response = await resultSetIterator.ReadNextAsync();
-        //                    foreach (var item in response)
-        //                    {
-        //                        if (item.PreviouslyAddedAdditonalItems != null)
-        //                        {
-        //                            List<string> items = item.PreviouslyAddedAdditonalItems.ToObject<List<string>>();
-        //                            previouslyAddedItems.AddRange(items);
-        //                        }
-        //                    }
-        //                }
-        //            }
-
-        //    return previouslyAddedItems;
-        //}
-
         public async Task<string> FetchUserCookbookId(string username)
         {
             //create sql to get coobook id from username
