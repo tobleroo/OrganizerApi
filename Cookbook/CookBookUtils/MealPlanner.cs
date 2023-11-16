@@ -10,6 +10,9 @@ namespace OrganizerApi.Cookbook.CookBookUtils
         public static List<Recipe> CreateEasyMealPlan(List<RecipeRequestEasyDTO> desiredTypes, List<Recipe> userCookbook)
         {
 
+            if (desiredTypes == null || userCookbook == null)
+                return new List<Recipe>();
+
             List<Recipe> result = new();
 
             //run thru all desired recipes.
@@ -62,7 +65,6 @@ namespace OrganizerApi.Cookbook.CookBookUtils
             }
 
             return recipeList;
-
         }
 
         public static List<Recipe> CreateSpecificMealPlan(List<RecipeRequestSpecificDTO> recipiesWanted, List<Recipe> cookbook)
