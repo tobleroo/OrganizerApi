@@ -5,8 +5,6 @@ VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrganizerApi", "OrganizerApi.csproj", "{A4B7A81A-6D3D-4D3A-8086-3835A2F07D73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrganizerApiTests", "..\OrganizerApiTests\OrganizerApiTests.csproj", "{C05C7C30-6E3D-4327-AD95-231DD3335DCC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{A4B7A81A-6D3D-4D3A-8086-3835A2F07D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4B7A81A-6D3D-4D3A-8086-3835A2F07D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4B7A81A-6D3D-4D3A-8086-3835A2F07D73}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C05C7C30-6E3D-4327-AD95-231DD3335DCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C05C7C30-6E3D-4327-AD95-231DD3335DCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C05C7C30-6E3D-4327-AD95-231DD3335DCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C05C7C30-6E3D-4327-AD95-231DD3335DCC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
