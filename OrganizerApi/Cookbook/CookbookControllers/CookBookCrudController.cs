@@ -74,7 +74,15 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             try
             {
                 Recipe recipeWanted = await _cookBookService.GetOneRecipe(name, recipeId);
-                return recipeWanted.IsNull() ? Ok(recipeWanted) : NotFound();
+
+                if(recipeWanted == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(recipeWanted);
+                }
 
             }catch (Exception ex) { return BadRequest("something went wrong -> " + ex.Message); }
 
@@ -89,7 +97,11 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
                 var name = User.FindFirstValue(ClaimTypes.Name);
 
                 var success = await _cookBookService.AddOneRecipeToCookbook(name, recipe);
-                return success ? Ok() : BadRequest();
+                if (success)
+                {
+                    return Ok();
+                }
+                else return BadRequest();
 
             } catch (Exception ex) { return BadRequest("something went wrong -> " + ex.Message); }
         }
@@ -101,7 +113,10 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             {
                 var name = User.FindFirstValue(ClaimTypes.Name);
                 var success = await _cookBookService.RemoveOneRecipeFromCookbook(recipeId, name);
-                return success ? Ok() : NotFound();
+                if(success)
+                {
+                    return Ok();
+                }else return BadRequest();
 
             } catch (Exception ex) { return BadRequest("something went wrong -> " + ex.Message); }
         }

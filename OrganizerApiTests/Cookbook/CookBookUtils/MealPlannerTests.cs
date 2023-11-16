@@ -17,7 +17,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
         [TestMethod()]
         public void CreateEasyMealPlan_Working()
         {
-            // :)
+            // wassap mafakka
 
             List<RecipeRequestEasyDTO> requestData = new()
             {
