@@ -23,19 +23,19 @@ namespace OrganizerApi.Cookbook.CookbookControllers
             _shoppinglistService = shoppinglistService;
         }
 
-        //[HttpPost("create-shoppinglist")]
-        //public async Task<ActionResult<List<ShoppingListRecipeDetails>>> CreateShoppingList([FromBody] List<ShoppingListDetailsDTO> recipiesToUse)
-        //{
-        //    var name = User.FindFirstValue(ClaimTypes.Name);
-        //    var cookBook = await _cookbookRepository.GetCookBook(name);
-        //    if (cookBook == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var finishedShoppingList = ShoppingListCreator.CreateShoppingList(recipiesToUse, cookBook.Recipes);
-        //    return Ok(finishedShoppingList);
-        //}
+        [HttpPost("create-shoppinglist")]
+        public async Task<ActionResult<List<ShoppingListRecipeDetails>>> CreateShoppingList([FromBody] List<ShoppingListDetailsDTO> recipiesToUse)
+        {
+            try
+            {
+                var name = User.FindFirstValue(ClaimTypes.Name);
+                var newShoppingListRecipies = await _shoppinglistService.CreateShoppingListFromRecipies(name, recipiesToUse);
+                return Ok(newShoppingListRecipies);
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpPost("add-to-shoppinglist")]
         public async Task<IActionResult> AddToShoppinglist([FromBody] SingleShopList shopList)
