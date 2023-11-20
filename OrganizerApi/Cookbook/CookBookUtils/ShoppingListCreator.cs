@@ -1,6 +1,7 @@
 ﻿using OrganizerApi.Cookbook.CookModels;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs;
 using OrganizerApi.Cookbook.CookModels.CookbookDTOs.shoppinglist;
+using System.Globalization;
 
 namespace OrganizerApi.Cookbook.CookBookUtils
 {
@@ -97,7 +98,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils
             return currentDate.ToString("dd/MM/yyyy");
         }
 
-        public static List<string> CheckIfItIsTimeToBuyAgain(List<AdditionalFoodItem> additionalItem)
+        public static List<string> CheckIfItIsTimeToBuyAgain(List<AdditionalFoodItem> additionalItem, DateTime? currentDateForTesting = null)
         {
             List<string> suggestedItemsToBuy = new();
 
@@ -105,7 +106,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils
 
                 foreach (var addItem in additionalItem)
                 {
-                    if (SeeIfItemShouldBeBoughtAgain(addItem))
+                    if (SeeIfItemShouldBeBoughtAgain(addItem, currentDateForTesting))
                     {
                         suggestedItemsToBuy.Add(addItem.Name);
                     }
@@ -114,23 +115,24 @@ namespace OrganizerApi.Cookbook.CookBookUtils
             return suggestedItemsToBuy;
         }
 
-        private static bool SeeIfItemShouldBeBoughtAgain(AdditionalFoodItem additionalItem)
+        private static bool SeeIfItemShouldBeBoughtAgain(AdditionalFoodItem additionalItem, DateTime? currentDate = null)
         {
+
+            DateTime todaysDate = currentDate ?? DateTime.Now;
 
             if (additionalItem.DatesWhenShopped.Count < 3)
             {
                 return false;
             }
 
-            List<DateTime> dates = additionalItem.DatesWhenShopped.Select(date => DateTime.Parse(date)).ToList();
+            List<DateTime> dates = additionalItem.DatesWhenShopped.Select(date => DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture)).ToList();
 
             //skip is there to make sure it is n-1 and not get out of bounds exception
             int totalDays = dates.Zip(dates.Skip(1), (date1, date2) => (int)(date2 - date1).TotalDays).Sum();
 
-            int averageDays = totalDays / (additionalItem.DatesWhenShopped.Count - 1);
+            int averageDays = totalDays / (additionalItem.DatesWhenShopped.Count);
 
             DateTime latestDateShopped = dates.Last();
-            DateTime todaysDate = DateTime.Now;
 
             int sinceLastTimeDays = (int)(todaysDate - latestDateShopped).TotalDays;
 

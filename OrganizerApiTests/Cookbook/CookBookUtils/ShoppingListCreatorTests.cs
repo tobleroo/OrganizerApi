@@ -144,7 +144,47 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
         [TestMethod()]
         public void CheckIfItIsTimeToBuyAgainTest()
         {
-            Assert.Fail();
+            List<AdditionalFoodItem> mockData = new()
+            {
+                new AdditionalFoodItem
+                {
+                    Name = "item1",
+                    DatesWhenShopped = new List<string>
+                    {
+                        new DateTime(2023, 2, 1).ToString("dd/MM/yyyy"),
+                        new DateTime(2023, 3, 1).ToString("dd/MM/yyyy"),
+                        new DateTime(2023, 4, 1).ToString("dd/MM/yyyy")
+                    }
+                },
+                new AdditionalFoodItem
+                {
+                    Name = "item2",
+                    DatesWhenShopped = new List<string>
+                    {
+                        new DateTime(2023, 4, 1).ToString("dd/MM/yyyy"),
+                        new DateTime(2023, 4, 15).ToString("dd/MM/yyyy"),
+                        new DateTime(2023, 4, 30).ToString("dd/MM/yyyy") // Dates are close, likely 'false' result
+                    }
+                },
+                new AdditionalFoodItem
+                {
+                    Name = "item3",
+                    DatesWhenShopped = new List<string>
+                    {
+                        new DateTime(2023, 4, 15).ToString("dd/MM/yyyy")
+                    }
+                }
+            };
+
+            DateTime testDate = new DateTime(2023, 05, 01); // Set a fixed date for testing
+
+            // Act
+            List<string> result = ShoppingListCreator.CheckIfItIsTimeToBuyAgain(mockData, testDate);
+
+
+            Assert.IsTrue(result.Contains("item1"));
+            Assert.IsFalse(result.Contains("item2"));
+            Assert.IsFalse(result.Contains("item3"));
         }
     }
 }
