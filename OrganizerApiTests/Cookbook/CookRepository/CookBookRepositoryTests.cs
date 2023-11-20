@@ -180,9 +180,38 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
         }
 
         [TestMethod()]
-        public void FetchOneRecipeTest()
+        public async Task FetchOneRecipeTest()
         {
-            throw new NotImplementedException();
+            var mockContainer = new Mock<Container>();
+            var expectedRecipe = new Recipe { 
+                RecipeName = "test",
+            };
+            string testUsername = "test";
+            string testRecipeId = expectedRecipe.Guid.ToString();
+
+            var mockFeedIterator = new Mock<FeedIterator<Recipe>>();
+            mockContainer.Setup(c => c.GetItemQueryIterator<Recipe>(
+                    It.IsAny<QueryDefinition>(),
+                    It.IsAny<string>(),
+                    It.IsAny<QueryRequestOptions>())
+                )
+                .Returns(mockFeedIterator.Object);
+
+            var mockFeedResponse = new Mock<FeedResponse<Recipe>>();
+            mockFeedResponse.Setup(_ => _.GetEnumerator()).Returns(new List<Recipe> { expectedRecipe }.GetEnumerator());
+
+            mockFeedIterator.Setup(_ => _.ReadNextAsync(It.IsAny<CancellationToken>()))
+                            .ReturnsAsync(mockFeedResponse.Object);
+            mockFeedIterator.SetupSequence(_ => _.HasMoreResults).Returns(true).Returns(false);
+
+            var cookBookRepository = new CookBookRepository(mockContainer.Object);
+
+            // Act
+            var result = await cookBookRepository.FetchOneRecipe(testUsername, testRecipeId);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(expectedRecipe, result);
         }
     }
 }
