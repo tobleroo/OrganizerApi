@@ -12,14 +12,14 @@ namespace OrganizerApi.Todo.Repository
 
         private Container container;
 
-        public TodoRepository() => InitializeContainerAsync().Wait();
+        //public TodoRepository() => InitializeContainerAsync().Wait();
 
-        private async Task InitializeContainerAsync()
-        {
-            var conn = new DbConnection("https://localhost:8081", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
-                "Organizer", "todo");
-            container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
-        }
+        //private async Task InitializeContainerAsync()
+        //{
+        //    var conn = new DbConnection("https://localhost:8081", "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+        //        "Organizer", "todo");
+        //    container = await conn.GetContainer(); // Await the Task<Container> object to get the Container
+        //}
 
         public async Task<TodoDocument?> GetUserTodoData(string username)
         {

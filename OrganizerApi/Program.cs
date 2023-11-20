@@ -14,6 +14,7 @@ using OrganizerApi.Cookbook.CookRepository;
 using OrganizerApi.Cookbook.CookServices;
 using OrganizerApi.Cookbook.Config;
 using OrganizerApi.Auth.Config;
+using Microsoft.Azure.Cosmos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +30,29 @@ IConfiguration configuration = new ConfigurationBuilder()
 var cosmosDbCookbookConfig = new CookbookConfigDTO();
 configuration.GetSection("CosmosDBCookbook").Bind(cosmosDbCookbookConfig);
 
+var cosmosCookbookClient = new CosmosClient(cosmosDbCookbookConfig.EndpointUri, cosmosDbCookbookConfig.PrimaryKey);
+var cookbookContainer = cosmosCookbookClient.GetDatabase(cosmosDbCookbookConfig.DatabaseId)
+                                             .GetContainer(cosmosDbCookbookConfig.ContainerId);
+
+builder.Services.AddSingleton(cosmosCookbookClient);
+builder.Services.AddSingleton(cookbookContainer);
+
+builder.Services.AddScoped<ICookBookRepository>(sp =>
+    new CookBookRepository(sp.GetRequiredService<Container>()));
+
+
 var cosmosDbAuthConfig = new AuthConfigDTO();
 configuration.GetSection("CosmosDBAuth").Bind(cosmosDbAuthConfig);
 
-builder.Services.AddSingleton(cosmosDbCookbookConfig);  // Register CosmosDbConfiguration as singleton
-builder.Services.AddSingleton(cosmosDbAuthConfig);
+var cosmosAuthClient = new CosmosClient(cosmosDbAuthConfig.EndpointUri, cosmosDbAuthConfig.PrimaryKey);
+var authContainer = cosmosAuthClient.GetDatabase(cosmosDbAuthConfig.DatabaseId)
+                                     .GetContainer(cosmosDbAuthConfig.ContainerId);
+
+builder.Services.AddSingleton(cosmosAuthClient);
+builder.Services.AddSingleton(authContainer);
+
+builder.Services.AddScoped<ICookBookRepository>(sp => new CookBookRepository(cookbookContainer));
+builder.Services.AddScoped<IUserRepository>(sp => new UserRepository(authContainer));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -79,11 +98,11 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICalendarService, CalendarService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<ITodoRepository, TodoRepository>();
-builder.Services.AddScoped<ICookBookRepository, CookBookRepository>();
+
 builder.Services.AddScoped<ICookBookService, CookbookService>();
 builder.Services.AddScoped<IMealService, MealService>();
 builder.Services.AddScoped<IShoppinglistService, ShoppinglistService>();

@@ -10,15 +10,9 @@ namespace OrganizerApi.Auth.Repository
 
         private Container container;
 
-        public UserRepository(AuthConfigDTO config)
+        public UserRepository(Container container)
         {
-            InitializeContainerAsync(config).Wait();
-        }
-
-        private async Task InitializeContainerAsync(AuthConfigDTO config)
-        {
-            var conn = new DbConnection(config.EndpointUri, config.PrimaryKey, config.DatabaseId, config.ContainerId);
-            container = await conn.GetContainer();
+            this.container = container ?? throw new ArgumentNullException(nameof(container));
         }
 
         public async Task<AppUser> GetUser(string id)

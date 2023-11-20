@@ -13,16 +13,11 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         private Container container;
 
-        public CookBookRepository(CookbookConfigDTO cosmosDbConfig)
+        public CookBookRepository(Container container)
         {
-            InitializeContainerAsync(cosmosDbConfig).Wait();
+            this.container = container ?? throw new ArgumentNullException(nameof(container));
         }
-
-        private async Task InitializeContainerAsync(CookbookConfigDTO config)
-        {
-            var conn = new DbConnection(config.EndpointUri, config.PrimaryKey, config.DatabaseId, config.ContainerId);
-            container = await conn.GetContainer();
-        }
+        
 
         public async Task<UserCookBook>? GetCookBook(string username)
         {
