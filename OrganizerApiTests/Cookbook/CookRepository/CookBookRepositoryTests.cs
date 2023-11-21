@@ -18,14 +18,6 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
     public class CookBookRepositoryTests
     {
 
-        //Mock mockContainer = new Mock<Container>();
-
-        [TestMethod()]
-        public void CookBookRepositoryTest()
-        {
-            throw new NotImplementedException();
-        }
-
         [TestMethod]
         public async Task GetCookBookTest()
         {
@@ -89,18 +81,24 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
         {
             // Arrange
             var mockContainer = new Mock<Container>();
-            var expectedShoppingList = new SingleShopList() { /* Initialize properties */ };
+            var expectedShoppingList = new SingleShopList(); // Initialize properties as needed
 
             // Mock FeedIterator and FeedResponse
             var mockFeedIterator = new Mock<FeedIterator<SingleShopList>>();
+            var shoppingListEnumerable = new[] { expectedShoppingList }.AsEnumerable();
             var mockFeedResponse = Mock.Of<FeedResponse<SingleShopList>>(_ =>
-                _.GetEnumerator() == ((IEnumerable<SingleShopList>)new[] { expectedShoppingList }).GetEnumerator());
+                _.GetEnumerator() == shoppingListEnumerable.GetEnumerator() &&
+                _.Count == shoppingListEnumerable.Count());
 
-            mockContainer.Setup(c => c.GetItemQueryIterator<SingleShopList>(It.IsAny<QueryDefinition>(), null, null))
-                         .Returns(mockFeedIterator.Object);
+            mockContainer.Setup(c => c.GetItemQueryIterator<SingleShopList>(
+                It.IsAny<QueryDefinition>(),
+                It.IsAny<string>(),
+                It.IsAny<QueryRequestOptions>()))
+                .Returns(mockFeedIterator.Object);
+
             mockFeedIterator.Setup(_ => _.ReadNextAsync(It.IsAny<CancellationToken>()))
                             .ReturnsAsync(mockFeedResponse);
-            mockFeedIterator.SetupSequence(_ => _.HasMoreResults).Returns(true).Returns(false);
+            mockFeedIterator.Setup(_ => _.HasMoreResults).Returns(true);
 
             var cookBookRepository = new CookBookRepository(mockContainer.Object);
 

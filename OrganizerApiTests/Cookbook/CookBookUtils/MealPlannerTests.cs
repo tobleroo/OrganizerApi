@@ -217,13 +217,13 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
             Assert.AreEqual(1, result["Breakfast"].Count);
             Assert.AreEqual("Pancakes", result["Breakfast"].First().RecipeName);
             Assert.AreEqual(1, result["Lunch"].Count);
-            Assert.AreEqual("Sandwich", result["Breakfast"].First().RecipeName);
+            Assert.AreEqual("Sandwich", result["Lunch"].First().RecipeName);
             Assert.AreEqual(1, result["Dinner"].Count);
-            Assert.AreEqual("Steak", result["Breakfast"].First().RecipeName);
+            Assert.AreEqual("Steak", result["Dinner"].First().RecipeName);
             Assert.AreEqual(1, result["Dessert"].Count);
-            Assert.AreEqual("Cake", result["Breakfast"].First().RecipeName);
+            Assert.AreEqual("Cake", result["Dessert"].First().RecipeName);
             Assert.AreEqual(1, result["Snack"].Count);
-            Assert.AreEqual("Chips", result["Breakfast"].First().RecipeName);
+            Assert.AreEqual("Chips", result["Snack"].First().RecipeName);
         }
 
         [TestMethod]
@@ -298,7 +298,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
 
             Assert.AreEqual(2, result.Count);
             Assert.AreEqual("Pancakes", result[0].RecipeName);
-            Assert.AreEqual("Sandwich", result[0].RecipeName);
+            Assert.AreEqual("Sandwich", result[1].RecipeName);
         }
 
         [TestMethod]

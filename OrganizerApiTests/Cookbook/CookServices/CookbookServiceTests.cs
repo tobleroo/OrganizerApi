@@ -16,11 +16,6 @@ namespace OrganizerApi.Cookbook.CookServices.Tests
     [TestClass()]
     public class CookbookServiceTests
     {
-        [TestMethod()]
-        public void CookbookServiceTest()
-        {
-            throw new NotImplementedException();
-        }
 
         [TestMethod()]
         public async Task GetCookBook_success()

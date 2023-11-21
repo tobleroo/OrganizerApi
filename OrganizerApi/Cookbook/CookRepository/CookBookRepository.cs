@@ -90,7 +90,7 @@ namespace OrganizerApi.Cookbook.CookRepository
                 FeedResponse<SingleShopList> currentResultSet = await queryResultSetIterator.ReadNextAsync();
                 if (currentResultSet.Count > 0)
                 {
-                    return currentResultSet.First();
+                    return currentResultSet.FirstOrDefault();
                 }
             }
 

@@ -128,7 +128,7 @@ namespace OrganizerApi.Auth.Repository.Tests
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(newUser, result);
+            Assert.AreEqual(true, result);
         }
 
         [TestMethod()]
