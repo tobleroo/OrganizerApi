@@ -6,7 +6,7 @@ namespace OrganizerApi.Auth.Repository
     {
 
         Task<AppUser> GetUser(string id);
-        Task<AppUser> SaveNewUser(AppUser user);
+        Task<bool> SaveNewUser(AppUser user);
 
         Task<AppUser> GetUserByUsername(string username);
 

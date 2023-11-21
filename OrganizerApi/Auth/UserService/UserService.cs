@@ -10,12 +10,10 @@ namespace OrganizerApi.Auth.UserService
 {
     public class UserService : IUserService
     {
-        private readonly ICalendarService _calendarService;
         private readonly IUserRepository _userRepository;
 
-        public UserService(ICalendarService calService, IUserRepository userRepo)
+        public UserService(IUserRepository userRepo)
         {
-            _calendarService = calService;
             _userRepository = userRepo;
         }
 
@@ -32,22 +30,6 @@ namespace OrganizerApi.Auth.UserService
         public async Task<AppUser> SaveOrUpdateUserData(AppUser user)
         {
             return await _userRepository.UpdateUser(user);
-        }
-
-        public async Task<HttpResponseMessage> CreateNewUserAsync(NewUserRequest newUserRequest)
-        {
-            var demoUser = new AppUser
-            {
-                Id = Guid.NewGuid(),
-                Name = newUserRequest.Name,
-                EmailAddress = newUserRequest.EmailAddress,
-                Password = newUserRequest.Password,
-                Calendar = _calendarService.CreateCalendar()
-            };
-
-            await _userRepository.SaveNewUser(demoUser);
-
-            return new HttpResponseMessage(HttpStatusCode.OK);
         }
     }
 }

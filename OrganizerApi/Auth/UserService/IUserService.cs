@@ -10,7 +10,6 @@ namespace OrganizerApi.Auth.UserService
 
         Task<AppUser> GetUser(string id);
         Task<AppUser> GetUserByUsername(string username);
-        Task<HttpResponseMessage> CreateNewUserAsync(NewUserRequest newUserRequest);
         Task<AppUser> SaveOrUpdateUserData(AppUser user);
 
     }

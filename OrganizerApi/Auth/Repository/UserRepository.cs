@@ -2,6 +2,7 @@
 using OrganizerApi.Auth.Config;
 using OrganizerApi.Auth.models;
 using OrganizerApi.Cookbook.Config;
+using System.Net;
 
 namespace OrganizerApi.Auth.Repository
 {
@@ -30,28 +31,52 @@ namespace OrganizerApi.Auth.Repository
 
         public async Task<AppUser> GetUserByUsername(string username)
         {
-            var query = new QueryDefinition("SELECT * FROM c WHERE c.Name = @username")
-                .WithParameter("@username", username);
-
-            var iterator = container.GetItemQueryIterator<AppUser>(query);
-            var response = await iterator.ReadNextAsync();
-
-            if (response.Count == 0)
+            try
             {
-                // User not found
-                return null;
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    // Handle or log invalid input as needed
+                    return null;
+                }
+
+                var query = new QueryDefinition("SELECT * FROM c WHERE c.Name = @username")
+                    .WithParameter("@username", username);
+
+                var iterator = container.GetItemQueryIterator<AppUser>(query);
+                var response = await iterator.ReadNextAsync();
+
+                return response.Count > 0 ? response.First() : null;
             }
-            else
+            catch (CosmosException ex)
             {
-                // Return the user
-                return response.Resource.First();
+                throw; 
+            }
+            catch (Exception ex)
+            {
+                throw;
             }
         }
 
-        public async Task<AppUser> SaveNewUser(AppUser user)
+        public async Task<bool> SaveNewUser(AppUser user)
         {
-            ItemResponse<AppUser> response = await container.CreateItemAsync(user, new PartitionKey(user.Id.ToString()));
-            return response.Resource;
+            try
+            {
+                await container.CreateItemAsync(user, new PartitionKey(user.Id.ToString()));
+                return true; // Item created successfully
+            }
+            catch (CosmosException e)
+            {
+                if (e.StatusCode == HttpStatusCode.Conflict)
+                {
+                    // Item with the same ID already exists
+                    return false;
+                }
+                else
+                {
+                    // Other error occurred during item creation
+                    throw;
+                }
+            }
         }
 
         public async Task<AppUser> UpdateUser(AppUser user)
@@ -69,7 +94,7 @@ namespace OrganizerApi.Auth.Repository
             var iterator = container.GetItemQueryIterator<AppUser>(query);
             var response = await iterator.ReadNextAsync();
 
-            return response.Resource.First();
+            return response.Resource.FirstOrDefault();
         }
 
         public async Task<bool> CheckIfUsernameExists(string username)
@@ -80,7 +105,8 @@ namespace OrganizerApi.Auth.Repository
             var iterator = container.GetItemQueryIterator<AppUser>(query);
             var response = await iterator.ReadNextAsync();
 
-            return response.Resource == null;
+            //returns true if user exists
+            return response.Resource != null;
         }
 
         public async Task<bool> CheckIfEmailExists(string email)
@@ -91,7 +117,8 @@ namespace OrganizerApi.Auth.Repository
             var iterator = container.GetItemQueryIterator<AppUser>(query);
             var response = await iterator.ReadNextAsync();
 
-            return response.Resource == null;
+            //returns true if user exists
+            return response.Resource != null;
         }
 
         public async Task<bool> CheckEmailAndUsernameExists(string email, string username)

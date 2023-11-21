@@ -15,16 +15,10 @@ namespace OrganizerApi.Auth.AuthService
 {
     public class AuthService : IAuthService
     {
-
-        private readonly IConfiguration _configuration;
-        private readonly ICalendarService _calendarService;
         private readonly IUserRepository _userRepository;
-        private readonly string _secretKey = "2e7b57ad2498e34f0b6405bb29c9959fcf63f2f89dc13e27a4dd524d9c16d9e2";
-        public AuthService(ICalendarService calendarService, IUserRepository userRepository, IConfiguration config)
+        public AuthService(IUserRepository userRepository)
         {
-            _calendarService = calendarService;
             _userRepository = userRepository;
-            _configuration = config;
         }
 
         public string CreateJwtToken(AppUser user)
@@ -105,11 +99,12 @@ namespace OrganizerApi.Auth.AuthService
                 Name = newUser.Name,
                 Password = hashedPassword,
                 EmailAddress = newUser.EmailAddress,
-                Calendar = _calendarService.CreateCalendar()
             };
 
-            await _userRepository.SaveNewUser(user);
-            return "user saved!";
+            var success  = await _userRepository.SaveNewUser(user);
+
+            if (success) return "user saved!";
+                else return "";
         }
 
         

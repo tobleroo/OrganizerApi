@@ -13,7 +13,7 @@ namespace OrganizerApi.Auth.models
         public string EmailAddress { get; set; }
         public string Password { get; set; }
 
-        public List<CalendarDay> Calendar { get; set; }
+        public List<CalendarDay>? Calendar { get; set; }
 
         public override string ToString()
         {
