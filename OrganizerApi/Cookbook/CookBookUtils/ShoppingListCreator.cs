@@ -95,7 +95,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils
         private static string CreateNewDate()
         {
             DateTime currentDate = DateTime.Now;
-            return currentDate.ToString("dd/MM/yyyy");
+            return currentDate.ToString("dd-MM-yyyy");
         }
 
         public static List<string> CheckIfItIsTimeToBuyAgain(List<AdditionalFoodItem> additionalItem, DateTime? currentDateForTesting = null)
