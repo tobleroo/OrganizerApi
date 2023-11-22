@@ -48,13 +48,11 @@ namespace OrganizerApi.Cookbook.CookServices
             {
                 SingleShopList = cookBook.ShoppingList,
                 //this is separated for the blazor components, can change later
-                AdditionalItems = cookBook.ShoppingList.AdditionalItems,
+                AdditionalItems = cookBook.GetPreviouslyAddedItemsAsListOfStrings(),
                 RecommendedAdditionalItems = recommededAddItems
             };
             return shoppingPageData;
         }
-
-
         public async Task<bool> UpdateShoppingListData(string username, ShoppingListPageDTO newShoppingList)
         {
             var cookbook = await _cookbookRepository.GetCookBook(username);
