@@ -11,5 +11,17 @@ namespace OrganizerApi.Cookbook.CookModels
         public SingleShopList ShoppingList { get; set; } = new SingleShopList();
 
         public List<AdditionalFoodItem> PreviouslyAddedAdditonalItems { get; set; } = new();
+
+        public List<string> GetPreviouslyAddedItemsAsListOfStrings()
+        {
+            var list = new List<string>();
+
+            foreach (var item in PreviouslyAddedAdditonalItems)
+            {
+                list.Add(item.Name);
+            }
+
+            return list;
+        }
     }
 }

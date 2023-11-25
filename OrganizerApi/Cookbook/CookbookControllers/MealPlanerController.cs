@@ -51,7 +51,7 @@ namespace OrganizerApi.Cookbook.CookCrudControllers
             var name = User.FindFirstValue(ClaimTypes.Name);
             try
             {
-                var listOfRecipeNamesAndCetogories = _mealService.GetRecipeNamesForSpecificGenerator(name);
+                var listOfRecipeNamesAndCetogories = await _mealService.GetRecipeNamesForSpecificGenerator(name);
                 return Ok(listOfRecipeNamesAndCetogories);
             } catch (InvalidOperationException ex)
             {
