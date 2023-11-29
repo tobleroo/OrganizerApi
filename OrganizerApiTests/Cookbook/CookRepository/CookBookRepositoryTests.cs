@@ -22,6 +22,7 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
         public async Task GetCookBookTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             var expectedCookBook = new UserCookBook() { OwnerUsername = "Test" };
 
@@ -41,7 +42,12 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
             mockFeedIterator.Setup(_ => _.ReadNextAsync(It.IsAny<CancellationToken>()))
                             .ReturnsAsync(mockFeedResponse);
 
-            var cookBookRepository = new CookBookRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            // Create CookBookRepository with mocked CosmosClient, DatabaseId, and ContainerId
+            var cookBookRepository = new CookBookRepository(mockCosmosClient.Object, "Organizer", "/id");
 
             // Act
             var result = await cookBookRepository.GetCookBook("Test");
@@ -55,8 +61,9 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
         public async Task UpdateCookBookTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
-            var testCookBook = new UserCookBook() { OwnerUsername = "test1"};
+            var testCookBook = new UserCookBook() { OwnerUsername = "test1" };
 
             var mockItemResponse = new Mock<ItemResponse<UserCookBook>>();
             mockItemResponse.SetupGet(r => r.StatusCode).Returns(HttpStatusCode.OK);
@@ -68,11 +75,16 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
                 )
                 .ReturnsAsync(mockItemResponse.Object);
 
-            var cookBookRepository = new CookBookRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var cookBookRepository = new CookBookRepository(mockCosmosClient.Object, "Organizer", "/id");
 
             // Act
             var result = await cookBookRepository.UpdateCookBook(testCookBook);
 
+            // Assert
             Assert.IsNotNull(result);
         }
 
@@ -80,6 +92,7 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
         public async Task GetShoppingListTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             var expectedShoppingList = new SingleShopList(); // Initialize properties as needed
 
@@ -100,7 +113,11 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
                             .ReturnsAsync(mockFeedResponse);
             mockFeedIterator.Setup(_ => _.HasMoreResults).Returns(true);
 
-            var cookBookRepository = new CookBookRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var cookBookRepository = new CookBookRepository(mockCosmosClient.Object, "Organizer", "/id");
 
             // Act
             var result = await cookBookRepository.GetShoppingList("testUser", "testCookbookId");
@@ -114,6 +131,7 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
         public async Task FetchUserCookbookIdTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             string expectedId = "testId";
 
@@ -128,7 +146,11 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
                             .ReturnsAsync(mockFeedResponse);
             mockFeedIterator.SetupSequence(_ => _.HasMoreResults).Returns(true).Returns(false);
 
-            var cookBookRepository = new CookBookRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var cookBookRepository = new CookBookRepository(mockCosmosClient.Object, "Organizer", "/id");
 
             // Act
             var result = await cookBookRepository.FetchUserCookbookId("testUser");
@@ -142,18 +164,19 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
         public async Task FetchRecipiesOverviewTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             var expectedRecipes = new List<RecipeOverviewData>() {
-                new RecipeOverviewData{
-                    Id = "id1",
-                    Name = "testObj1",
-                    TimeToCook = 10
-                },new RecipeOverviewData{
-                    Id = "id2",
-                    Name = "testObj2",
-                    TimeToCook = 20
-                }
-            };
+        new RecipeOverviewData{
+            Id = "id1",
+            Name = "testObj1",
+            TimeToCook = 10
+        },new RecipeOverviewData{
+            Id = "id2",
+            Name = "testObj2",
+            TimeToCook = 20
+        }
+    };
 
             var mockFeedIterator = new Mock<FeedIterator<RecipeOverviewData>>();
             mockContainer.Setup(c => c.GetItemQueryIterator<RecipeOverviewData>(It.IsAny<QueryDefinition>(), null, null))
@@ -166,7 +189,11 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
                             .ReturnsAsync(mockFeedResponse.Object);
             mockFeedIterator.SetupSequence(_ => _.HasMoreResults).Returns(true).Returns(false);
 
-            var cookBookRepository = new CookBookRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var cookBookRepository = new CookBookRepository(mockCosmosClient.Object, "Organizer", "/id");
 
             // Act
             var result = await cookBookRepository.FetchRecipiesOverview("testUser");
@@ -180,8 +207,11 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
         [TestMethod()]
         public async Task FetchOneRecipeTest()
         {
+            // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
-            var expectedRecipe = new Recipe { 
+            var expectedRecipe = new Recipe
+            {
                 RecipeName = "test",
             };
             string testUsername = "test";
@@ -202,7 +232,11 @@ namespace OrganizerApi.Cookbook.CookRepository.Tests
                             .ReturnsAsync(mockFeedResponse.Object);
             mockFeedIterator.SetupSequence(_ => _.HasMoreResults).Returns(true).Returns(false);
 
-            var cookBookRepository = new CookBookRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var cookBookRepository = new CookBookRepository(mockCosmosClient.Object, "cookbook", "/id");
 
             // Act
             var result = await cookBookRepository.FetchOneRecipe(testUsername, testRecipeId);
