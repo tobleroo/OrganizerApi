@@ -13,14 +13,30 @@ namespace OrganizerApi.Cookbook.CookRepository
 
         private Container container;
 
-        public CookBookRepository(Container container)
+        public CookBookRepository(CosmosClient cosmosClient, string databaseId, string containerId, int? throughput = null)
         {
-            this.container = container ?? throw new ArgumentNullException(nameof(container));
+            var database = cosmosClient.GetDatabase(databaseId);
+            CreateContainerIfNotExistsAsync(database, containerId, throughput).GetAwaiter().GetResult();
+            container = database.GetContainer(containerId);
         }
-        
+
+        private async Task CreateContainerIfNotExistsAsync(Database database, string containerId, int? throughput = null)
+        {
+            try
+            {
+                await database.CreateContainerIfNotExistsAsync(containerId, "/id", throughput);
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // Handle exception if the database does not exist
+            }
+        }
+
 
         public async Task<UserCookBook>? GetCookBook(string username)
         {
+
+
             try
             {
                 var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";
@@ -36,7 +52,9 @@ namespace OrganizerApi.Cookbook.CookRepository
                     }
                 }
 
-                return null;
+                //if there is no user cookbook, create new and return
+                return new UserCookBook() { OwnerUsername = username
+                };
             }
             catch (Exception ex)
             {

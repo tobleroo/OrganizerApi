@@ -1,5 +1,4 @@
-﻿using OrganizerApi.Calendar.Services;
-using System.Net;
+﻿using System.Net;
 using OrganizerApi.Auth.models.DTOs;
 using OrganizerApi.Auth.models;
 using OrganizerApi.Auth.Repository;
