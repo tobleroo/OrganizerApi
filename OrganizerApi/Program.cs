@@ -1,5 +1,4 @@
 
-using OrganizerApi.Calendar.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -8,8 +7,6 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using OrganizerApi.Auth.UserService;
 using OrganizerApi.Auth.Repository;
-using OrganizerApi.Todo.service;
-using OrganizerApi.Todo.Repository;
 using OrganizerApi.Cookbook.CookRepository;
 using OrganizerApi.Cookbook.CookServices;
 using OrganizerApi.Cookbook.Config;
@@ -26,33 +23,35 @@ IConfiguration configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .Build();
 
-// Configure Cosmos DB settings
+// Configure Cosmos DB settings for Cookbook
 var cosmosDbCookbookConfig = new CookbookConfigDTO();
 configuration.GetSection("CosmosDBCookbook").Bind(cosmosDbCookbookConfig);
 
 var cosmosCookbookClient = new CosmosClient(cosmosDbCookbookConfig.EndpointUri, cosmosDbCookbookConfig.PrimaryKey);
-var cookbookContainer = cosmosCookbookClient.GetDatabase(cosmosDbCookbookConfig.DatabaseId)
-                                             .GetContainer(cosmosDbCookbookConfig.ContainerId);
 
 builder.Services.AddSingleton(cosmosCookbookClient);
-builder.Services.AddSingleton(cookbookContainer);
 
 builder.Services.AddScoped<ICookBookRepository>(sp =>
-    new CookBookRepository(sp.GetRequiredService<Container>()));
+    new CookBookRepository(
+        cosmosCookbookClient,
+        cosmosDbCookbookConfig.DatabaseId,
+        cosmosDbCookbookConfig.ContainerId
+    ));
 
-
+// Configure Cosmos DB settings for Auth
 var cosmosDbAuthConfig = new AuthConfigDTO();
 configuration.GetSection("CosmosDBAuth").Bind(cosmosDbAuthConfig);
 
 var cosmosAuthClient = new CosmosClient(cosmosDbAuthConfig.EndpointUri, cosmosDbAuthConfig.PrimaryKey);
-var authContainer = cosmosAuthClient.GetDatabase(cosmosDbAuthConfig.DatabaseId)
-                                     .GetContainer(cosmosDbAuthConfig.ContainerId);
 
 builder.Services.AddSingleton(cosmosAuthClient);
-builder.Services.AddSingleton(authContainer);
 
-builder.Services.AddScoped<ICookBookRepository>(sp => new CookBookRepository(cookbookContainer));
-builder.Services.AddScoped<IUserRepository>(sp => new UserRepository(authContainer));
+builder.Services.AddScoped<IUserRepository>(sp =>
+    new UserRepository(
+        cosmosAuthClient,
+        cosmosDbAuthConfig.DatabaseId,
+        cosmosDbAuthConfig.ContainerId
+    ));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -97,11 +96,7 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ICalendarService, CalendarService>();
-
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ITodoService, TodoService>();
-builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 
 builder.Services.AddScoped<ICookBookService, CookbookService>();
 builder.Services.AddScoped<IMealService, MealService>();

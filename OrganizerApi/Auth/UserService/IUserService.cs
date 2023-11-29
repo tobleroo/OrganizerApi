@@ -1,5 +1,4 @@
-﻿using OrganizerApi.Calendar.Services;
-using OrganizerApi.Auth.models.DTOs;
+﻿using OrganizerApi.Auth.models.DTOs;
 using OrganizerApi.Auth.models;
 using System.Security.Claims;
 

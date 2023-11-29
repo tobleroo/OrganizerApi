@@ -6,7 +6,6 @@ using OrganizerApi.Auth.models;
 using OrganizerApi.Auth.models.DTOs;
 using OrganizerApi.Auth.Repository;
 using OrganizerApi.Auth.Utils;
-using OrganizerApi.Calendar.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
