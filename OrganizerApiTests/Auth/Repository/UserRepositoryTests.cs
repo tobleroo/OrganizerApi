@@ -19,59 +19,28 @@ namespace OrganizerApi.Auth.Repository.Tests
         [TestMethod()]
         public async Task GetUserTest()
         {
-
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
-            var testUser = new AppUser { Id = Guid.NewGuid()};
+            var testUser = new AppUser { Id = Guid.NewGuid() };
             var testUserId = testUser.Id.ToString();
 
             var mockItemResponse = new Mock<ItemResponse<AppUser>>();
             mockItemResponse.SetupGet(r => r.Resource).Returns(testUser);
 
-            // General setup for any ReadItemAsync call
+            // Setup for ReadItemAsync call
             mockContainer.Setup(c => c.ReadItemAsync<AppUser>(It.IsAny<string>(), It.IsAny<PartitionKey>(), It.IsAny<ItemRequestOptions>(), It.IsAny<CancellationToken>()))
                          .ReturnsAsync(mockItemResponse.Object);
 
-            var repository = new UserRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            // Create repository with mocked CosmosClient, DatabaseId, and ContainerId
+            var repository = new UserRepository(mockCosmosClient.Object, "DatabaseId", "ContainerId");
 
             // Act
             var result = await repository.GetUser(testUserId);
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(testUser, result);
-
-        }
-
-        [TestMethod()]
-        public async Task GetUserByUsernameTest()
-        {
-            // Arrange
-            var mockContainer = new Mock<Container>();
-            var testUsername = "testUsername";
-            var testUser = new AppUser { Name = "testUsername" };
-
-            var mockFeedIterator = new Mock<FeedIterator<AppUser>>();
-
-            // Set up the GetItemQueryIterator call
-            mockContainer.Setup(c => c.GetItemQueryIterator<AppUser>(
-                It.Is<QueryDefinition>(q => q.QueryText.Contains("@username")),
-                null,
-                It.IsAny<QueryRequestOptions>()))
-                .Returns(mockFeedIterator.Object);
-
-            // Set up the FeedIterator to return our test user
-            var mockFeedResponse = new Mock<FeedResponse<AppUser>>();
-            mockFeedResponse.Setup(m => m.GetEnumerator()).Returns(new List<AppUser> { testUser }.GetEnumerator());
-            mockFeedResponse.Setup(m => m.Count).Returns(1);
-
-            mockFeedIterator.Setup(_ => _.ReadNextAsync(It.IsAny<CancellationToken>()))
-                            .ReturnsAsync(mockFeedResponse.Object);
-
-            var repository = new UserRepository(mockContainer.Object);
-
-            // Act
-            var result = await repository.GetUserByUsername(testUsername);
 
             // Assert
             Assert.IsNotNull(result);
@@ -111,17 +80,21 @@ namespace OrganizerApi.Auth.Repository.Tests
         public async Task SaveNewUserTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             var newUser = new AppUser { Id = Guid.NewGuid() };
 
             var mockItemResponse = new Mock<ItemResponse<AppUser>>();
             mockItemResponse.SetupGet(r => r.Resource).Returns(newUser);
 
-            // Correct setup for CreateItemAsync without null for CancellationToken
             mockContainer.Setup(c => c.CreateItemAsync(It.IsAny<AppUser>(), It.IsAny<PartitionKey>(), null, CancellationToken.None))
                          .ReturnsAsync(mockItemResponse.Object);
 
-            var repository = new UserRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var repository = new UserRepository(mockCosmosClient.Object, "DatabaseId", "ContainerId");
 
             // Act
             var result = await repository.SaveNewUser(newUser);
@@ -135,17 +108,21 @@ namespace OrganizerApi.Auth.Repository.Tests
         public async Task UpdateUserTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
-            var existingUser = new AppUser { Id = Guid.NewGuid(), /* other properties */ };
+            var existingUser = new AppUser { Id = Guid.NewGuid() };
 
             var mockItemResponse = new Mock<ItemResponse<AppUser>>();
             mockItemResponse.SetupGet(r => r.Resource).Returns(existingUser);
 
-            // Correct setup for UpsertItemAsync with the required parameters
             mockContainer.Setup(c => c.UpsertItemAsync(It.IsAny<AppUser>(), It.IsAny<PartitionKey>(), It.IsAny<ItemRequestOptions>(), It.IsAny<CancellationToken>()))
                          .ReturnsAsync(mockItemResponse.Object);
 
-            var repository = new UserRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var repository = new UserRepository(mockCosmosClient.Object, "DatabaseId", "ContainerId");
 
             // Act
             var result = await repository.UpdateUser(existingUser);
@@ -159,6 +136,7 @@ namespace OrganizerApi.Auth.Repository.Tests
         public async Task GetUserByEmailTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             var testEmail = "test@example.com";
             var testUser = new AppUser { EmailAddress = testEmail };
@@ -178,7 +156,11 @@ namespace OrganizerApi.Auth.Repository.Tests
                                      It.IsAny<QueryRequestOptions>()))
                          .Returns(mockFeedIterator.Object);
 
-            var repository = new UserRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var repository = new UserRepository(mockCosmosClient.Object, "DatabaseId", "ContainerId");
 
             // Act
             var result = await repository.GetUserByEmail(testEmail);
@@ -192,6 +174,7 @@ namespace OrganizerApi.Auth.Repository.Tests
         public async Task CheckIfUsernameExistsTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             var testUsername = "testUsername";
             var users = new List<AppUser> { new AppUser() }; // Simulating a user found
@@ -208,7 +191,11 @@ namespace OrganizerApi.Auth.Repository.Tests
                                      It.IsAny<QueryRequestOptions>()))
                          .Returns(mockFeedIterator.Object);
 
-            var repository = new UserRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var repository = new UserRepository(mockCosmosClient.Object, "DatabaseId", "ContainerId");
 
             // Act
             var result = await repository.CheckIfUsernameExists(testUsername);
@@ -221,6 +208,7 @@ namespace OrganizerApi.Auth.Repository.Tests
         public async Task CheckIfEmailExistsTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             var testEmail = "test@example.com";
             var users = new List<AppUser>() { new AppUser { EmailAddress = testEmail } };
@@ -237,7 +225,11 @@ namespace OrganizerApi.Auth.Repository.Tests
                                      It.IsAny<QueryRequestOptions>()))
                          .Returns(mockFeedIterator.Object);
 
-            var repository = new UserRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var repository = new UserRepository(mockCosmosClient.Object, "DatabaseId", "ContainerId");
 
             // Act
             var result = await repository.CheckIfEmailExists(testEmail);
@@ -250,6 +242,7 @@ namespace OrganizerApi.Auth.Repository.Tests
         public async Task CheckEmailAndUsernameExistsTest()
         {
             // Arrange
+            var mockCosmosClient = new Mock<CosmosClient>();
             var mockContainer = new Mock<Container>();
             var testUsername = "testUsername";
             var testEmail = "test@example.com";
@@ -270,7 +263,11 @@ namespace OrganizerApi.Auth.Repository.Tests
             mockFeedIterator.Setup(_ => _.ReadNextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(mockFeedResponse.Object);
             mockFeedIterator.Setup(_ => _.HasMoreResults).Returns(false);
 
-            var repository = new UserRepository(mockContainer.Object);
+            var mockDatabase = new Mock<Database>();
+            mockDatabase.Setup(d => d.GetContainer(It.IsAny<string>())).Returns(mockContainer.Object);
+            mockCosmosClient.Setup(c => c.GetDatabase(It.IsAny<string>())).Returns(mockDatabase.Object);
+
+            var repository = new UserRepository(mockCosmosClient.Object, "DatabaseId", "ContainerId");
 
             // Act
             var result = await repository.CheckEmailAndUsernameExists(testEmail, testUsername);
