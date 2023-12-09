@@ -1,6 +1,6 @@
 ﻿namespace OrganizerApi.Auth.Config
 {
-    public class AuthConfigDTO
+    public class ConfigDTO
     {
         public string EndpointUri { get; set; }
         public string PrimaryKey { get; set; }

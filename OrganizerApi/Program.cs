@@ -12,6 +12,8 @@ using OrganizerApi.Cookbook.CookServices;
 using OrganizerApi.Cookbook.Config;
 using OrganizerApi.Auth.Config;
 using Microsoft.Azure.Cosmos;
+using OrganizerApi.Diary.Repository;
+using OrganizerApi.Diary.DiaryServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +41,7 @@ builder.Services.AddScoped<ICookBookRepository>(sp =>
     ));
 
 // Configure Cosmos DB settings for Auth
-var cosmosDbAuthConfig = new AuthConfigDTO();
+var cosmosDbAuthConfig = new ConfigDTO();
 configuration.GetSection("CosmosDBAuth").Bind(cosmosDbAuthConfig);
 
 var cosmosAuthClient = new CosmosClient(cosmosDbAuthConfig.EndpointUri, cosmosDbAuthConfig.PrimaryKey);
@@ -51,6 +53,20 @@ builder.Services.AddScoped<IUserRepository>(sp =>
         cosmosAuthClient,
         cosmosDbAuthConfig.DatabaseId,
         cosmosDbAuthConfig.ContainerId
+    ));
+
+var cosmosDbDiaryConfig = new ConfigDTO();
+configuration.GetSection("CosmosDBDiary").Bind(cosmosDbDiaryConfig);
+
+var cosmosDiaryClient = new CosmosClient(cosmosDbDiaryConfig.EndpointUri, cosmosDbDiaryConfig.PrimaryKey);
+
+builder.Services.AddSingleton(cosmosDiaryClient);
+
+builder.Services.AddScoped<IDiaryRepository>(sp =>
+    new DiaryRepository(
+        cosmosDiaryClient,
+        cosmosDbDiaryConfig.DatabaseId,
+        cosmosDbDiaryConfig.ContainerId
     ));
 
 builder.Services.AddControllers();
@@ -101,6 +117,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICookBookService, CookbookService>();
 builder.Services.AddScoped<IMealService, MealService>();
 builder.Services.AddScoped<IShoppinglistService, ShoppinglistService>();
+
+builder.Services.AddScoped<IDiaryService, DiaryService>();
 
 var app = builder.Build();
 
