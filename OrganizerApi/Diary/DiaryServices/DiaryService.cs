@@ -170,5 +170,18 @@ namespace OrganizerApi.Diary.DiaryServices
 
             return process;
         }
+        public async Task<ProcessData> UpdateAddress(string username, DiaryDTO dto)
+        {
+            var processData = new ProcessData() { Message = " could not change address!", IsValid = false };
+            var diary = await _diaryRepo.GetDiary(username);
+
+            diary.OwnerHomeTown = dto.OwnerHomeTown;
+            diary.OwnerHomeCountry = dto.OwnerHomeCountry;
+
+            var success = await _diaryRepo.UpsertDiary(diary);
+
+            if (success) processData.Message = "Address changed!"; processData.IsValid = true;
+            return processData;
+        }
     }
 }

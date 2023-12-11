@@ -94,6 +94,15 @@ namespace OrganizerApi.Diary.DiaryControllers
 
             return Ok(processData);
         }
+
+        [HttpPost("update-address")]
+        public async Task<IActionResult> UpdateHomeAdress([FromBody] DiaryDTO diaryDTO)
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var sucessData = await _diaryService.UpdateAddress(name,diaryDTO);
+
+            return Ok(sucessData);
+        }
     }
         
 }

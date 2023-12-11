@@ -11,6 +11,7 @@ namespace OrganizerApi.Diary.DiaryServices
         Task<ProcessData> DeleteOnePost(string username, string postId);
         Task<DiaryDTO> FetchDiary(string ownerName);
         Task<ProcessData> SignIn(string username, string passwordAttempt);
+        Task<ProcessData> UpdateAddress(string username, DiaryDTO dto);
         Task<ProcessData> UpdatePost(string username, DiaryPost newPostData);
     }
 }
