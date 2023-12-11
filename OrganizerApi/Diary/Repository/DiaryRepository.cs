@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Hosting;
 using OrganizerApi.Diary.models;
 using OrganizerApi.Diary.models.DiaryDTOs;
 using System.Dynamic;
@@ -137,6 +138,25 @@ namespace OrganizerApi.Diary.Repository
                 return new ProcessData() { IsValid = false, Message = "something went wrong -> " + ex.Message};
             }
 
+        }
+
+        public async Task<DiaryPost> GetOnePost(string username, string Id)
+        {
+            string queryString = $"SELECT * FROM c JOIN p IN c.Posts WHERE p.Id = '{Id}'";
+            QueryDefinition queryDefinition = new QueryDefinition(queryString);
+            FeedIterator<DiaryPost> queryResultSetIterator = container.GetItemQueryIterator<DiaryPost>(queryDefinition);
+            List<DiaryPost> posts = new List<DiaryPost>();
+
+            while (queryResultSetIterator.HasMoreResults)
+            {
+                FeedResponse<DiaryPost> currentResultSet = await queryResultSetIterator.ReadNextAsync();
+                foreach (DiaryPost post in currentResultSet)
+                {
+                    posts.Add(post);
+                }
+            }
+
+            return posts.FirstOrDefault();
         }
     }
 }

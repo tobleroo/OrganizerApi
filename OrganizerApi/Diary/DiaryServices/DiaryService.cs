@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using OrganizerApi.Diary.DiaryUtils;
 using OrganizerApi.Diary.models;
@@ -46,6 +47,30 @@ namespace OrganizerApi.Diary.DiaryServices
                 OwnerHomeCountry = diary.OwnerHomeCountry,
                 OwnerHomeTown = diary.OwnerHomeTown,
             };
+        }
+
+        public async Task<ProcessData> DeleteOnePost(string username, string postId)
+        {
+            var process = new ProcessData() { IsValid = false, Message="Could not delete post!" };
+            //get the diary fro musername
+            var diary = await _diaryRepo.GetDiary(username);
+
+            //run through all posts and remove where id is same
+            //go backwards to remove while in loop
+            foreach (var post in diary.Posts)
+            {
+                if(post.Id == postId)
+                {
+                    diary.Posts.Remove(post);
+                    break;
+                }
+            }
+
+            //save diary
+            var couldDelete = await _diaryRepo.UpsertDiary(diary);
+            if(couldDelete) process.IsValid = true; process.Message = "Post deleted!";
+
+            return process;
         }
 
         public async Task<ProcessData> CreateDiaryAccount(string username, CreateDiaryDataDTO createDiaryDataDTO)
@@ -121,6 +146,29 @@ namespace OrganizerApi.Diary.DiaryServices
             var diaryId = await _diaryRepo.GetDocumentIdByUsernameAsync(username);
             return await _diaryRepo.PatchNewStory(diaryId, newPostData);
 
+        }
+
+        public async Task<ProcessData> UpdatePost(string username, DiaryPost newPostData)
+        {
+
+            ProcessData process = new() { IsValid = false , Message = "could not update post!"};
+
+            //encrypt new content
+            var titleEncrypted = DiaryEncryption.EncryptContent(newPostData.Title);
+            var contentEncrypted = DiaryEncryption.EncryptContent(newPostData.Content);
+
+            // resave the post 
+            var diary = await _diaryRepo.GetDiary(username);
+            DiaryPost postToUpdate = diary.Posts.First(p => p.Id == newPostData.Id);
+
+            postToUpdate.Content = contentEncrypted;
+            postToUpdate.Title = titleEncrypted;
+            postToUpdate.LatestRevisedDate = newPostData.LatestRevisedDate;
+
+            var successResave = await _diaryRepo.UpsertDiary(diary);
+            if (successResave) process.IsValid = true; process.Message = "successfully updated post!";
+
+            return process;
         }
     }
 }

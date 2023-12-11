@@ -77,6 +77,23 @@ namespace OrganizerApi.Diary.DiaryControllers
             var SignInProcessData = await _diaryService.SignIn(name, signInDTO.Password);
             return Ok(SignInProcessData);
         }
+
+        [HttpPost("update-post")]
+        public async Task<IActionResult> UpdatePost([FromBody] DiaryPost updatedPost)
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var processData = await _diaryService.UpdatePost(name, updatedPost);
+            return Ok(processData);
+        }
+
+        [HttpPost("delete-post")]
+        public async Task<IActionResult> DeletePost([FromBody] string postId)
+        {
+            var name = User.FindFirstValue(ClaimTypes.Name);
+            var processData = await _diaryService.DeleteOnePost(name, postId);
+
+            return Ok(processData);
+        }
     }
         
 }
