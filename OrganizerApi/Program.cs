@@ -14,6 +14,8 @@ using OrganizerApi.Auth.Config;
 using Microsoft.Azure.Cosmos;
 using OrganizerApi.Diary.Repository;
 using OrganizerApi.Diary.DiaryServices;
+using OrganizerApi.Todo.TodoRepsitory;
+using OrganizerApi.Todo.TodoServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,6 +71,20 @@ builder.Services.AddScoped<IDiaryRepository>(sp =>
         cosmosDbDiaryConfig.ContainerId
     ));
 
+var cosmosDbTodoConfig = new ConfigDTO();
+configuration.GetSection("CosmosDBTodo").Bind(cosmosDbTodoConfig);
+
+var cosmosTodoClient = new CosmosClient(cosmosDbTodoConfig.EndpointUri, cosmosDbTodoConfig.PrimaryKey);
+
+builder.Services.AddSingleton(cosmosTodoClient);
+
+builder.Services.AddScoped<ITodoRepository>(sp =>
+    new TodoRepository(
+        cosmosTodoClient,
+        cosmosDbTodoConfig.DatabaseId,
+        cosmosDbTodoConfig.ContainerId
+    ));
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -119,6 +135,8 @@ builder.Services.AddScoped<IMealService, MealService>();
 builder.Services.AddScoped<IShoppinglistService, ShoppinglistService>();
 
 builder.Services.AddScoped<IDiaryService, DiaryService>();
+
+builder.Services.AddScoped<ITodoService, TodoService>();
 
 var app = builder.Build();
 

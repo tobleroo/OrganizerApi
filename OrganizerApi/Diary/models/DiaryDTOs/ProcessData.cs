@@ -2,7 +2,7 @@
 {
     public class ProcessData
     {
-        public bool IsValid { get; set; }
+        public bool IsValid { get; set; } = false;
         public string Message { get; set; }
     }
 }
