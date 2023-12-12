@@ -1,5 +1,6 @@
 ﻿using OrganizerApi.Diary.models.DiaryDTOs;
 using OrganizerApi.Todo.TodoRepsitory;
+using OrganizerApi.Todo.TodoUtils;
 using OrganizerBlazor.Todo.Models;
 
 namespace OrganizerApi.Todo.TodoServices
@@ -133,7 +134,9 @@ namespace OrganizerApi.Todo.TodoServices
 
             var todoDoc = await repository.GetTodo(username);
 
-            todoDoc.ActiveTodos = freshList;
+            todoDoc.TodoCategories = ActiveTodoListUtils.AddTodaysDateIfCompleted(freshList, todoDoc.TodoCategories);
+
+            todoDoc.ActiveTodos = ActiveTodoListUtils.RemoveCompletedTasks(freshList);
 
             var successSave = await repository.UpsertTodo(todoDoc);
 
@@ -141,7 +144,7 @@ namespace OrganizerApi.Todo.TodoServices
             {
                 process.Message = "Successfully updated todolist!";
                 process.IsValid = true;
-                process.Data = freshList;
+                process.Data = todoDoc.ActiveTodos;
             }
 
             return process;
