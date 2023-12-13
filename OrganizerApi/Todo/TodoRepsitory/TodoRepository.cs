@@ -46,6 +46,8 @@ namespace OrganizerApi.Todo.TodoRepsitory
                     return new TodoDocument() { Owner = username };
                 }
 
+                if(todoDocument.Owner == "not set!") todoDocument.Owner = username;
+
                 return todoDocument;
             }
             catch (Exception ex)
