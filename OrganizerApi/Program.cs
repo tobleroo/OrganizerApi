@@ -137,6 +137,7 @@ builder.Services.AddScoped<IShoppinglistService, ShoppinglistService>();
 builder.Services.AddScoped<IDiaryService, DiaryService>();
 
 builder.Services.AddScoped<ITodoService, TodoService>();
+builder.Services.AddScoped<ITodoFeatureService, TodoFeatureService>();
 
 var app = builder.Build();
 
