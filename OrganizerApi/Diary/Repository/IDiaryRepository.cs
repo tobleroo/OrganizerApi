@@ -11,7 +11,7 @@ namespace OrganizerApi.Diary.Repository
         Task<UserDiary>? GetDiary(string username);
         Task<string> GetDocumentIdByUsernameAsync(string username);
         Task<DiaryPost> GetOnePost(string username, string Id);
-        Task<ProcessData> PatchNewStory(string diaryId, DiaryPost newPostData);
-        Task<bool> UpsertDiary(UserDiary diary);
+        Task<bool> UpdateDiary(string username, UserDiary diary);
+        //Task<ProcessData> PatchNewStory(string diaryId, DiaryPost newPostData);
     }
 }

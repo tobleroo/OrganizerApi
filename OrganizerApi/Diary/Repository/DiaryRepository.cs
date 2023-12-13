@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Hosting;
+using OrganizerApi.Auth.models;
 using OrganizerApi.Diary.models;
 using OrganizerApi.Diary.models.DiaryDTOs;
 using System.Dynamic;
@@ -30,60 +31,54 @@ namespace OrganizerApi.Diary.Repository
             }
         }
 
-        public async Task<UserDiary>? GetDiary(string username)
+        public async Task<UserDiary> GetDiary(string username)
         {
             try
             {
-                var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";
-                QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-                FeedIterator<UserDiary> queryResultSetIterator = container.GetItemQueryIterator<UserDiary>(queryDefinition);
+                var query = new QueryDefinition("SELECT VALUE c.Diary FROM c WHERE c.Name = @username")
+            .WithParameter("@username", username);
 
-                while (queryResultSetIterator.HasMoreResults)
-                {
-                    FeedResponse<UserDiary> currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                    foreach (UserDiary diary in currentResultSet)
-                    {
-                        return diary;
-                    }
-                }
+                var iterator = container.GetItemQueryIterator<UserDiary>(query);
+                var response = await iterator.ReadNextAsync();
 
-                //if there is no user cookbook, create new and return
-                return new UserDiary()
-                {
-                    OwnerUsername = username
-                };
+                return response.FirstOrDefault() ?? new UserDiary { OwnerUsername = username };
             }
-            catch (Exception ex)
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                throw new ApplicationException("Error in diary repository method", ex);
+                return new UserDiary { OwnerUsername = username };
             }
-
         }
 
-        public async Task<bool> UpsertDiary(UserDiary diary)
+        public async Task<bool> UpdateDiary(string username, UserDiary diary)
         {
             try
             {
-                var response = await container.UpsertItemAsync(diary, new PartitionKey(diary.id));
+                var query = new QueryDefinition("SELECT * FROM c WHERE c.Name = @username")
+                    .WithParameter("@username", username);
 
-                // Optionally, you can check the status of the response to confirm the upsert operation
-                return response.StatusCode == System.Net.HttpStatusCode.Created ||
-                       response.StatusCode == System.Net.HttpStatusCode.OK;
+                var iterator = container.GetItemQueryIterator<AppUser>(query);
+                var response = await iterator.ReadNextAsync();
+                var user = response.FirstOrDefault();
+
+                if (user == null)
+                {
+                    return false;
+                }
+
+                user.Diary = diary;
+                await container.ReplaceItemAsync(user, user.Id.ToString(), new PartitionKey(user.Id.ToString()));
+                return true;
             }
-            catch (CosmosException ex)
+            catch (CosmosException)
             {
-                throw new ApplicationException($"Error in upserting diary: {ex.Message}", ex);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Error in upserting diary", ex);
+                throw;
             }
         }
 
         public async Task<string> FetchPassword(string username)
         {
-            var query = new QueryDefinition("SELECT c.DiaryPassword FROM c WHERE c.OwnerUsername = @diaryUsername")
-            .WithParameter("@diaryUsername", username);
+            var query = new QueryDefinition("SELECT c.Diary.DiaryPassword FROM c WHERE c.Name = @username")
+                .WithParameter("@username", username);
 
             var iterator = container.GetItemQueryIterator<dynamic>(query);
 
@@ -92,16 +87,20 @@ namespace OrganizerApi.Diary.Repository
                 var response = await iterator.ReadNextAsync();
                 foreach (var item in response)
                 {
-                    return item.DiaryPassword;
+                    // Since the DiaryPassword is directly selected, it should be directly accessible.
+                    if (item.DiaryPassword != null)
+                    {
+                        return item.DiaryPassword.ToString();
+                    }
                 }
             }
 
-            return string.Empty;
+            return string.Empty; // Return empty string if not found.
         }
 
         public async Task<string> GetDocumentIdByUsernameAsync(string username)
         {
-            var query = new QueryDefinition("SELECT c.id FROM c WHERE c.OwnerUsername = @username")
+            var query = new QueryDefinition("SELECT c.Diary.id FROM c WHERE c.Name = @username")
                         .WithParameter("@username", username);
 
             using (FeedIterator<dynamic> feedIterator = container.GetItemQueryIterator<dynamic>(query))
@@ -111,39 +110,43 @@ namespace OrganizerApi.Diary.Repository
                     FeedResponse<dynamic> response = await feedIterator.ReadNextAsync();
                     foreach (var item in response)
                     {
-                        return item.id; // Assuming username is unique and will return only one document
+                        // Extract and return the id of the Diary object
+                        return item.id as string; // Ensure type casting to string
                     }
                 }
             }
 
-            return null; // Return null or appropriate value if no document is found
+            return null; // Return null if no Diary id is found
         }
 
-        public async Task<ProcessData> PatchNewStory(string diaryId, DiaryPost newPostData)
+        //public async Task<ProcessData> PatchNewStory(string diaryId, DiaryPost newPostData)
+        //{
+
+        //    var patchOperations = new List<PatchOperation>
+        //    {
+        //        PatchOperation.Add("/Posts/-", newPostData)
+        //    };
+
+        //    try
+        //    {
+        //        await container.PatchItemAsync<dynamic>(diaryId, new PartitionKey(diaryId), patchOperations);
+        //        return new ProcessData() { IsValid = true, Message = "successfully added story!" };
+        //    }
+        //    catch (CosmosException ex)
+        //    {
+        //        // Handle exceptions (e.g., document not found, etc.)
+        //        return new ProcessData() { IsValid = false, Message = "something went wrong -> " + ex.Message};
+        //    }
+
+        //}
+
+        public async Task<DiaryPost> GetOnePost(string username, string postId)
         {
+            string queryString = $"SELECT VALUE p FROM c JOIN p IN c.Diary.Posts WHERE c.Name = @username AND p.Id = @postId";
+            QueryDefinition queryDefinition = new QueryDefinition(queryString)
+                .WithParameter("@username", username)
+                .WithParameter("@postId", postId);
 
-            var patchOperations = new List<PatchOperation>
-            {
-                PatchOperation.Add("/Posts/-", newPostData)
-            };
-
-            try
-            {
-                await container.PatchItemAsync<dynamic>(diaryId, new PartitionKey(diaryId), patchOperations);
-                return new ProcessData() { IsValid = true, Message = "successfully added story!" };
-            }
-            catch (CosmosException ex)
-            {
-                // Handle exceptions (e.g., document not found, etc.)
-                return new ProcessData() { IsValid = false, Message = "something went wrong -> " + ex.Message};
-            }
-
-        }
-
-        public async Task<DiaryPost> GetOnePost(string username, string Id)
-        {
-            string queryString = $"SELECT * FROM c JOIN p IN c.Posts WHERE p.Id = '{Id}'";
-            QueryDefinition queryDefinition = new QueryDefinition(queryString);
             FeedIterator<DiaryPost> queryResultSetIterator = container.GetItemQueryIterator<DiaryPost>(queryDefinition);
             List<DiaryPost> posts = new List<DiaryPost>();
 
