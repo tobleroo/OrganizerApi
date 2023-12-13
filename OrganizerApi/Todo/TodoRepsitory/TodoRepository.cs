@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
+using OrganizerApi.Auth.models;
 using OrganizerApi.Diary.models;
 using OrganizerBlazor.Todo.Models;
 
@@ -32,45 +33,46 @@ namespace OrganizerApi.Todo.TodoRepsitory
         {
             try
             {
-                var sqlQueryText = $"SELECT * FROM c WHERE c.Owner = '{username}'";
-                QueryDefinition queryDefinition = new QueryDefinition(sqlQueryText);
-                FeedIterator<TodoDocument> queryResultSetIterator = container.GetItemQueryIterator<TodoDocument>(queryDefinition);
+                var query = new QueryDefinition("SELECT VALUE c.TodoDoc FROM c WHERE c.Name = @username")
+                    .WithParameter("@username", username);
 
-                while (queryResultSetIterator.HasMoreResults)
+                var iterator = container.GetItemQueryIterator<TodoDocument>(query);
+                var response = await iterator.ReadNextAsync();
+
+                var todoDocument = response.FirstOrDefault();
+                if (todoDocument == null)
                 {
-                    FeedResponse<TodoDocument> currentResultSet = await queryResultSetIterator.ReadNextAsync();
-                    foreach (TodoDocument todo in currentResultSet)
-                    {
-                        return todo;
-                    }
+                    // If there is no TodoDocument, create new and return
+                    return new TodoDocument() { Owner = username };
                 }
 
-                //if there is no user cookbook, create new and return
-                return new TodoDocument()
-                {
-                    Owner = username
-                };
+                return todoDocument;
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Error in diary repository method", ex);
+                throw new ApplicationException("Error in todo repository method", ex);
             }
-
         }
 
-        public async Task<bool> UpsertTodo(TodoDocument todoDoc)
+        public async Task<bool> UpsertTodo(string username, TodoDocument todoDoc)
         {
             try
             {
-                var response = await container.UpsertItemAsync(todoDoc, new PartitionKey(todoDoc.id));
+                var query = new QueryDefinition("SELECT * FROM c WHERE c.Name = @username")
+                    .WithParameter("@username", username);
 
-                // Optionally, you can check the status of the response to confirm the upsert operation
-                return response.StatusCode == System.Net.HttpStatusCode.Created ||
-                       response.StatusCode == System.Net.HttpStatusCode.OK;
-            }
-            catch (CosmosException ex)
-            {
-                throw new ApplicationException($"Error in upserting todo: {ex.Message}", ex);
+                var iterator = container.GetItemQueryIterator<AppUser>(query);
+                var response = await iterator.ReadNextAsync();
+                var user = response.FirstOrDefault();
+
+                if (user == null)
+                {
+                    return false; // User not found
+                }
+
+                user.TodoDoc = todoDoc;
+                var updatedResponse = await container.ReplaceItemAsync(user, user.Id.ToString(), new PartitionKey(user.Id.ToString()));
+                return updatedResponse.StatusCode == System.Net.HttpStatusCode.OK;
             }
             catch (Exception ex)
             {

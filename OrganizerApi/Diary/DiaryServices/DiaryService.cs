@@ -67,7 +67,7 @@ namespace OrganizerApi.Diary.DiaryServices
             }
 
             //save diary
-            var couldDelete = await _diaryRepo.UpsertDiary(diary);
+            var couldDelete = await _diaryRepo.UpdateDiary(username,diary);
             if(couldDelete) process.IsValid = true; process.Message = "Post deleted!";
 
             return process;
@@ -95,7 +95,7 @@ namespace OrganizerApi.Diary.DiaryServices
             diary.DiaryPassword = hashedPassword;
 
             // save the data and return success or not
-            var success = await _diaryRepo.UpsertDiary(diary);
+            var success = await _diaryRepo.UpdateDiary(username, diary);
             if (success)
                 return new ProcessData() { IsValid = true, Message = "successfully created diary account!" };
 
@@ -143,8 +143,11 @@ namespace OrganizerApi.Diary.DiaryServices
             newPostData.Title = DiaryEncryption.EncryptContent(newPostData.Title);
 
             // save to db
-            var diaryId = await _diaryRepo.GetDocumentIdByUsernameAsync(username);
-            return await _diaryRepo.PatchNewStory(diaryId, newPostData);
+            var diary = await _diaryRepo.GetDiary(username);
+            diary.Posts.Add(newPostData);
+            var success = await _diaryRepo.UpdateDiary(username, diary);
+
+            return new ProcessData() { IsValid = success };
 
         }
 
@@ -165,11 +168,12 @@ namespace OrganizerApi.Diary.DiaryServices
             postToUpdate.Title = titleEncrypted;
             postToUpdate.LatestRevisedDate = newPostData.LatestRevisedDate;
 
-            var successResave = await _diaryRepo.UpsertDiary(diary);
+            var successResave = await _diaryRepo.UpdateDiary(username, diary);
             if (successResave) process.IsValid = true; process.Message = "successfully updated post!";
 
             return process;
         }
+
         public async Task<ProcessData> UpdateAddress(string username, DiaryDTO dto)
         {
             var processData = new ProcessData() { Message = " could not change address!", IsValid = false };
@@ -178,7 +182,7 @@ namespace OrganizerApi.Diary.DiaryServices
             diary.OwnerHomeTown = dto.OwnerHomeTown;
             diary.OwnerHomeCountry = dto.OwnerHomeCountry;
 
-            var success = await _diaryRepo.UpsertDiary(diary);
+            var success = await _diaryRepo.UpdateDiary(username, diary);
 
             if (success) processData.Message = "Address changed!"; processData.IsValid = true;
             return processData;

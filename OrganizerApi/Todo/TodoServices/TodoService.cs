@@ -34,7 +34,7 @@ namespace OrganizerApi.Todo.TodoServices
 
             todoDoc.TodoCategories.Add(new TodoCategory() { CategoryTitle = todoCat});
 
-            var couldSave = await repository.UpsertTodo(todoDoc);
+            var couldSave = await repository.UpsertTodo(username,todoDoc);
             
             if(couldSave) process.IsValid = true; process.Message = "Category saved!";
 
@@ -57,7 +57,7 @@ namespace OrganizerApi.Todo.TodoServices
 
             CategoryToAddTo.Activities.Add(propCat.Activities.First());
 
-            var saveSuccess = await repository.UpsertTodo(todoDoc);
+            var saveSuccess = await repository.UpsertTodo(username,todoDoc);
             if(saveSuccess) process.IsValid = true; process.Message = "Task Saved!";
 
             return process;
@@ -76,7 +76,7 @@ namespace OrganizerApi.Todo.TodoServices
 
             todoDoc.ActiveTodos.Add(activeTask);
 
-            var couldSave = await repository.UpsertTodo(todoDoc);
+            var couldSave = await repository.UpsertTodo(username, todoDoc);
 
             if(couldSave) process.IsValid = true; process.Message = "task added!";
 
@@ -90,7 +90,7 @@ namespace OrganizerApi.Todo.TodoServices
             var todoDoc = await repository.GetTodo(username);
             todoDoc.TodoCategories = todoDoc.TodoCategories.Where(category => category.CategoryTitle != categoryToRemove).ToList();
 
-            var success = await repository.UpsertTodo(todoDoc);
+            var success = await repository.UpsertTodo(username, todoDoc);
             if(success) process.IsValid = true; process.Message = "category removed!";
 
             return process;
@@ -117,7 +117,7 @@ namespace OrganizerApi.Todo.TodoServices
                 process.Message = "No task found to remove.";
             }
 
-            var savingSuccess = await repository.UpsertTodo(todoDoc);
+            var savingSuccess = await repository.UpsertTodo(username, todoDoc);
 
             if (savingSuccess)
             {
@@ -138,7 +138,7 @@ namespace OrganizerApi.Todo.TodoServices
 
             todoDoc.ActiveTodos = ActiveTodoListUtils.RemoveCompletedTasks(freshList);
 
-            var successSave = await repository.UpsertTodo(todoDoc);
+            var successSave = await repository.UpsertTodo(username, todoDoc);
 
             if (successSave)
             {
