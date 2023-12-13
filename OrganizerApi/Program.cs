@@ -12,6 +12,10 @@ using OrganizerApi.Cookbook.CookServices;
 using OrganizerApi.Cookbook.Config;
 using OrganizerApi.Auth.Config;
 using Microsoft.Azure.Cosmos;
+using OrganizerApi.Diary.Repository;
+using OrganizerApi.Diary.DiaryServices;
+using OrganizerApi.Todo.TodoRepsitory;
+using OrganizerApi.Todo.TodoServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +43,7 @@ builder.Services.AddScoped<ICookBookRepository>(sp =>
     ));
 
 // Configure Cosmos DB settings for Auth
-var cosmosDbAuthConfig = new AuthConfigDTO();
+var cosmosDbAuthConfig = new ConfigDTO();
 configuration.GetSection("CosmosDBAuth").Bind(cosmosDbAuthConfig);
 
 var cosmosAuthClient = new CosmosClient(cosmosDbAuthConfig.EndpointUri, cosmosDbAuthConfig.PrimaryKey);
@@ -51,6 +55,34 @@ builder.Services.AddScoped<IUserRepository>(sp =>
         cosmosAuthClient,
         cosmosDbAuthConfig.DatabaseId,
         cosmosDbAuthConfig.ContainerId
+    ));
+
+var cosmosDbDiaryConfig = new ConfigDTO();
+configuration.GetSection("CosmosDBDiary").Bind(cosmosDbDiaryConfig);
+
+var cosmosDiaryClient = new CosmosClient(cosmosDbDiaryConfig.EndpointUri, cosmosDbDiaryConfig.PrimaryKey);
+
+builder.Services.AddSingleton(cosmosDiaryClient);
+
+builder.Services.AddScoped<IDiaryRepository>(sp =>
+    new DiaryRepository(
+        cosmosDiaryClient,
+        cosmosDbDiaryConfig.DatabaseId,
+        cosmosDbDiaryConfig.ContainerId
+    ));
+
+var cosmosDbTodoConfig = new ConfigDTO();
+configuration.GetSection("CosmosDBTodo").Bind(cosmosDbTodoConfig);
+
+var cosmosTodoClient = new CosmosClient(cosmosDbTodoConfig.EndpointUri, cosmosDbTodoConfig.PrimaryKey);
+
+builder.Services.AddSingleton(cosmosTodoClient);
+
+builder.Services.AddScoped<ITodoRepository>(sp =>
+    new TodoRepository(
+        cosmosTodoClient,
+        cosmosDbTodoConfig.DatabaseId,
+        cosmosDbTodoConfig.ContainerId
     ));
 
 builder.Services.AddControllers();
@@ -101,6 +133,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICookBookService, CookbookService>();
 builder.Services.AddScoped<IMealService, MealService>();
 builder.Services.AddScoped<IShoppinglistService, ShoppinglistService>();
+
+builder.Services.AddScoped<IDiaryService, DiaryService>();
+
+builder.Services.AddScoped<ITodoService, TodoService>();
+builder.Services.AddScoped<ITodoFeatureService, TodoFeatureService>();
 
 var app = builder.Build();
 
