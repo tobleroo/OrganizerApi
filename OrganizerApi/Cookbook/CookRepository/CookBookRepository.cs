@@ -36,7 +36,6 @@ namespace OrganizerApi.Cookbook.CookRepository
         public async Task<UserCookBook>? GetCookBook(string username)
         {
 
-
             try
             {
                 var sqlQueryText = $"SELECT * FROM c WHERE c.OwnerUsername = '{username}'";

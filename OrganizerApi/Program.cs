@@ -16,6 +16,8 @@ using OrganizerApi.Diary.Repository;
 using OrganizerApi.Diary.DiaryServices;
 using OrganizerApi.Todo.TodoRepsitory;
 using OrganizerApi.Todo.TodoServices;
+using OrganizerApi.Bucketlist.Repositories;
+using OrganizerApi.Bucketlist.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +87,20 @@ builder.Services.AddScoped<ITodoRepository>(sp =>
         cosmosDbTodoConfig.ContainerId
     ));
 
+var cosmosDbBucketConfig = new ConfigDTO();
+configuration.GetSection("CosmosDbBucket").Bind(cosmosDbBucketConfig);
+
+var cosmosBucketClient = new CosmosClient(cosmosDbBucketConfig.EndpointUri, cosmosDbBucketConfig.PrimaryKey);
+
+builder.Services.AddSingleton(cosmosBucketClient);
+
+builder.Services.AddScoped<IBucketlistCrudRepository>(sp =>
+    new BucketlistCrudRepository(
+        cosmosTodoClient,
+        cosmosDbTodoConfig.DatabaseId,
+        cosmosDbTodoConfig.ContainerId
+    ));
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -138,6 +154,8 @@ builder.Services.AddScoped<IDiaryService, DiaryService>();
 
 builder.Services.AddScoped<ITodoService, TodoService>();
 builder.Services.AddScoped<ITodoFeatureService, TodoFeatureService>();
+
+builder.Services.AddScoped<IBucketlistService, BucketlistService>();
 
 var app = builder.Build();
 
