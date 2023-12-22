@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using OrganizerApi.Bucketlist.Models;
 using OrganizerApi.Diary.models;
 using OrganizerBlazor.Todo.Models;
 
@@ -17,6 +18,8 @@ namespace OrganizerApi.Auth.models
         public UserDiary Diary { get; set; } = new UserDiary() { OwnerUsername = "not set"};
 
         public TodoDocument TodoDoc { get; set; } = new TodoDocument() { Owner = "not set!" };
+
+        public BucketlistDocument Bucketlist { get; set; } = new();
 
         public override string ToString()
         {

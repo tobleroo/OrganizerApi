@@ -60,6 +60,24 @@ namespace OrganizerApi.Cookbook.CookServices
             //do the additional item stuffs before replacing the shoppinglist
             cookbook = ShoppingListCreator.AddDateToAdditionalItemLatestUse(cookbook, newShoppingList.SingleShopList);
 
+            //remove the items that has been completed
+
+            //remove from recipe ingredients
+            foreach (var recipe in newShoppingList.SingleShopList.SingleShopListRecipes)
+            {
+                recipe.Ingredients.RemoveAll(ingredient => ingredient.Finished);
+            }
+
+            //check if any recipe contains 0 recipies, if yes, remove
+            newShoppingList.SingleShopList.SingleShopListRecipes = newShoppingList.SingleShopList.SingleShopListRecipes
+                                                                        .Where(recipe => recipe.Ingredients.Count > 0)
+                                                                        .ToList();
+
+            newShoppingList.SingleShopList.AdditionalItems = newShoppingList.SingleShopList.AdditionalItems
+                                                                .Where(extra => extra.Completed != true)
+                                                                .ToList();
+
+
             cookbook.ShoppingList = newShoppingList.SingleShopList;
 
             return await _cookbookRepository.UpdateCookBook(cookbook);

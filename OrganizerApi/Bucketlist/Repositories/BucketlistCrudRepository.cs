@@ -1,23 +1,23 @@
 ﻿using Microsoft.Azure.Cosmos;
 using OrganizerApi.Auth.models;
-using OrganizerApi.Diary.models;
+using OrganizerApi.Bucketlist.Models;
 using OrganizerBlazor.Todo.Models;
 
-namespace OrganizerApi.Todo.TodoRepsitory
+namespace OrganizerApi.Bucketlist.Repositories
 {
-    public class TodoRepository : ITodoRepository
+    public class BucketlistCrudRepository : IBucketlistCrudRepository
     {
 
         private Container container;
 
-        public TodoRepository(CosmosClient cosmosClient, string databaseId, string containerId, int? throughput = null)
+        public BucketlistCrudRepository(CosmosClient cosmosClient, string databaseId, string containerId, int? throughput = null)
         {
             var database = cosmosClient.GetDatabase(databaseId);
             CreateContainerIfNotExistsAsync(database, containerId, throughput).GetAwaiter().GetResult();
             container = database.GetContainer(containerId);
         }
 
-        public async Task CreateContainerIfNotExistsAsync(Database database, string containerId, int? throughput = null)
+        private async Task CreateContainerIfNotExistsAsync(Database database, string containerId, int? throughput = null)
         {
             try
             {
@@ -29,26 +29,26 @@ namespace OrganizerApi.Todo.TodoRepsitory
             }
         }
 
-        public async Task<TodoDocument> GetTodo(string username)
+        public async Task<BucketlistDocument> GetBucketlist(string username)
         {
             try
             {
-                var query = new QueryDefinition("SELECT VALUE c.TodoDoc FROM c WHERE c.Name = @username")
+                var query = new QueryDefinition("SELECT VALUE c.Bucketlist FROM c WHERE c.Name = @username")
                     .WithParameter("@username", username);
 
-                var iterator = container.GetItemQueryIterator<TodoDocument>(query);
+                var iterator = container.GetItemQueryIterator<BucketlistDocument>(query);
                 var response = await iterator.ReadNextAsync();
 
-                var todoDocument = response.FirstOrDefault();
-                if (todoDocument == null)
+                var bucketDocument = response.FirstOrDefault();
+                if (bucketDocument == null)
                 {
                     // If there is no TodoDocument, create new and return
-                    return new TodoDocument() { Owner = username };
+                    return new BucketlistDocument() { Owner = username };
                 }
 
-                if (todoDocument.Owner == "not set!") todoDocument.Owner = username;
+                if (bucketDocument.Owner == "not set!") bucketDocument.Owner = username;
 
-                return todoDocument;
+                return bucketDocument;
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace OrganizerApi.Todo.TodoRepsitory
             }
         }
 
-        public async Task<bool> UpsertTodo(string username, TodoDocument todoDoc)
+        public async Task<bool> UpdateBucketlist(string username, BucketlistDocument bucketlist)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace OrganizerApi.Todo.TodoRepsitory
                     return false; // User not found
                 }
 
-                user.TodoDoc = todoDoc;
+                user.Bucketlist = bucketlist;
                 var updatedResponse = await container.ReplaceItemAsync(user, user.Id.ToString(), new PartitionKey(user.Id.ToString()));
                 return updatedResponse.StatusCode == System.Net.HttpStatusCode.OK;
             }
@@ -81,7 +81,5 @@ namespace OrganizerApi.Todo.TodoRepsitory
                 throw new ApplicationException("Error in upserting todo", ex);
             }
         }
-
-
     }
 }

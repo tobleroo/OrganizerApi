@@ -66,7 +66,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils
 
             foreach (var item in newShopList.AdditionalItems.Where(item => !cookbook.ShoppingList.AdditionalItems.Contains(item)))
             {
-                UpdateOrCreateAdditionalItem(cookbook, item, newDate);
+                UpdateOrCreateAdditionalItem(cookbook, item.Name, newDate);
             }
 
             return cookbook;
