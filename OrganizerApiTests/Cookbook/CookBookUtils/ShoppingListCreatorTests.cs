@@ -108,9 +108,10 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
 
             SingleShopList newShopList = new()
             {
-                AdditionalItems = new List<string>()
+                AdditionalItems = new List<AdditionalFoodCurrentItem>()
                 {
-                    "testItemOne"
+                   new AdditionalFoodCurrentItem(){ 
+                   Name ="testItemOne"}
                 }
             };
 
@@ -130,9 +131,9 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
 
             SingleShopList newShopList = new()
             {
-                AdditionalItems = new List<string>()
+                AdditionalItems = new List<AdditionalFoodCurrentItem>()
                 {
-                    "testItemOne"
+                   new AdditionalFoodCurrentItem(){}
                 }
             };
 

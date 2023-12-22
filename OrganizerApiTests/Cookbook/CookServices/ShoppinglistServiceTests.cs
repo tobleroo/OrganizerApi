@@ -220,20 +220,34 @@ namespace OrganizerApi.Cookbook.CookServices.Tests
                           .ReturnsAsync(true);
 
             var shoppinglistService = new ShoppinglistService(mockRepository.Object);
+            var recipeToAdd1 = new SingleShopListRecipe
+            {
+                RecipeName = "recipeToAdd1"
+            };
+
+            // Add ingredients to the recipeToAdd1
+            recipeToAdd1.Ingredients.Add(new Ingredient { Name = "Ingredient1", Quantity = 2.5, Unit = "Cups" });
+            recipeToAdd1.Ingredients.Add(new Ingredient { Name = "Ingredient2", Quantity = 1, Unit = "Tablespoon" });
+
+            // Create another SingleShopListRecipe
+            var recipeToAdd2 = new SingleShopListRecipe
+            {
+                RecipeName = "recipeToAdd2"
+            };
+
+            // Add ingredients to the recipeToAdd2
+            recipeToAdd2.Ingredients.Add(new Ingredient { Name = "Ingredient3", Quantity = 3, Unit = "Pieces" });
+            recipeToAdd2.Ingredients.Add(new Ingredient { Name = "Ingredient4", Quantity = 0.5, Unit = "Pound" });
+
+            // Create the newShoppingList with the added recipes and ingredients
             var newShoppingList = new ShoppingListPageDTO
             {
-                SingleShopList = new SingleShopList()
+                SingleShopList = new SingleShopList
                 {
-                    SingleShopListRecipes = new List<SingleShopListRecipe>()
+                SingleShopListRecipes = new List<SingleShopListRecipe>
                     {
-                        new SingleShopListRecipe
-                        {
-                            RecipeName = "recipeToAdd1"
-                        },
-                        new SingleShopListRecipe
-                        {
-                            RecipeName = "recipeToAdd2"
-                        }
+                        recipeToAdd1,
+                        recipeToAdd2
                     }
                 }
             };

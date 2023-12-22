@@ -42,7 +42,6 @@ namespace OrganizerApi.Cookbook.CookServices
         {
             var cookBook = await _cookbookRepository.GetCookBook(username);
 
-
             var recommededAddItems = ShoppingListCreator.CheckIfItIsTimeToBuyAgain(cookBook.PreviouslyAddedAdditonalItems);
             ShoppingListPageDTO shoppingPageData = new ShoppingListPageDTO()
             {
