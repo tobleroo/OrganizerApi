@@ -29,7 +29,7 @@ namespace OrganizerApi.Cookbook.CookServices
             var cookBook = await _cookbookRepository.GetCookBook(username);
 
             //this has to be before addRnges below, otherwise it cant separate existing to new items added
-            cookBook = ShoppingListCreator.AddDateToAdditionalItemLatestUse(cookBook, shopList);
+            cookBook = ShoppingListCreator.AddItemToAdditionalList(cookBook, shopList);
 
             cookBook.ShoppingList.SingleShopListRecipes.AddRange(shopList.SingleShopListRecipes);
             cookBook.ShoppingList.AdditionalItems.AddRange(shopList.AdditionalItems);
@@ -57,7 +57,7 @@ namespace OrganizerApi.Cookbook.CookServices
             var cookbook = await _cookbookRepository.GetCookBook(username);
 
             //do the additional item stuffs before replacing the shoppinglist
-            cookbook = ShoppingListCreator.AddDateToAdditionalItemLatestUse(cookbook, newShoppingList.SingleShopList);
+            cookbook = ShoppingListCreator.AddItemToAdditionalList(cookbook, newShoppingList.SingleShopList);
 
             //remove the items that has been completed
 

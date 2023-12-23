@@ -54,7 +54,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils
             };
         }
 
-        public static UserCookBook AddDateToAdditionalItemLatestUse(UserCookBook cookbook, SingleShopList newShopList)
+        public static UserCookBook AddItemToAdditionalList(UserCookBook cookbook, SingleShopList newShopList)
         {
 
             if (newShopList.AdditionalItems.Count == 0)
@@ -66,17 +66,17 @@ namespace OrganizerApi.Cookbook.CookBookUtils
 
             foreach (var item in newShopList.AdditionalItems.Where(item => !cookbook.ShoppingList.AdditionalItems.Contains(item)))
             {
-                UpdateOrCreateAdditionalItem(cookbook, item.Name, newDate);
+                UpdateOrCreateAdditionalItem(cookbook, item.Name, newDate, item.Completed);
             }
 
             return cookbook;
         }
 
-        private static void UpdateOrCreateAdditionalItem(UserCookBook cookbook, string item, string newDate)
+        private static void UpdateOrCreateAdditionalItem(UserCookBook cookbook, string item, string newDate, bool isCompleted)
         {
             var existingItem = cookbook.PreviouslyAddedAdditonalItems.FirstOrDefault(addItem => addItem.Name.Equals(item));
 
-            if (existingItem != null)
+            if (existingItem != null && isCompleted)
             {
                 existingItem.DatesWhenShopped.Add(newDate);
             }
@@ -85,7 +85,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils
                 var newAddItem = new AdditionalFoodItem
                 {
                     Name = item,
-                    DatesWhenShopped = new List<string> { newDate }
+                    DatesWhenShopped = new List<string> { }
                 };
 
                 cookbook.PreviouslyAddedAdditonalItems.Add(newAddItem);
