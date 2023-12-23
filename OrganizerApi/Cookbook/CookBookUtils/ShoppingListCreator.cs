@@ -80,7 +80,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils
             {
                 existingItem.DatesWhenShopped.Add(newDate);
             }
-            else
+            else if(existingItem == null)
             {
                 var newAddItem = new AdditionalFoodItem
                 {
