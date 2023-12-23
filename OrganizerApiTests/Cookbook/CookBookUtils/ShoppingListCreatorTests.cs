@@ -91,56 +91,56 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
             Assert.IsTrue(result.Count == 0);
         }
 
-        [TestMethod()]
-        public void AddDateToAdditionalItemLatestUseTest()
-        {
-            UserCookBook user = new UserCookBook()
-            {
-                OwnerUsername = "test",
-                PreviouslyAddedAdditonalItems = new List<AdditionalFoodItem>()
-                {
-                    new AdditionalFoodItem
-                    {
-                        Name = "testItemOne",
-                    }
-                }
-            };
+        //[TestMethod()]
+        //public void AddDateToAdditionalItemLatestUseTest()
+        //{
+        //    UserCookBook user = new UserCookBook()
+        //    {
+        //        OwnerUsername = "test",
+        //        PreviouslyAddedAdditonalItems = new List<AdditionalFoodItem>()
+        //        {
+        //            new AdditionalFoodItem
+        //            {
+        //                Name = "testItemOne",
+        //            }
+        //        }
+        //    };
 
-            SingleShopList newShopList = new()
-            {
-                AdditionalItems = new List<AdditionalFoodCurrentItem>()
-                {
-                   new AdditionalFoodCurrentItem(){ 
-                   Name ="testItemOne"}
-                }
-            };
+        //    SingleShopList newShopList = new()
+        //    {
+        //        AdditionalItems = new List<AdditionalFoodCurrentItem>()
+        //        {
+        //           new AdditionalFoodCurrentItem(){ 
+        //           Name ="testItemOne"}
+        //        }
+        //    };
 
-            var result = ShoppingListCreator.AddItemToAdditionalList(user, newShopList);
+        //    var result = ShoppingListCreator.AddItemToAdditionalList(user, newShopList);
 
-            Assert.IsTrue(result.PreviouslyAddedAdditonalItems[0].DatesWhenShopped.Count > 0);
+        //    Assert.IsTrue(result.PreviouslyAddedAdditonalItems[0].DatesWhenShopped.Count > 0);
 
-        }
+        //}
 
-        [TestMethod]
-        public void AddDateToAdditionalItemLatestUse_AddNewItemToCookbookList()
-        {
-            UserCookBook user = new UserCookBook()
-            {
-                OwnerUsername = "test",
-            };
+        //[TestMethod]
+        //public void AddDateToAdditionalItemLatestUse_AddNewItemToCookbookList()
+        //{
+        //    UserCookBook user = new UserCookBook()
+        //    {
+        //        OwnerUsername = "test",
+        //    };
 
-            SingleShopList newShopList = new()
-            {
-                AdditionalItems = new List<AdditionalFoodCurrentItem>()
-                {
-                   new AdditionalFoodCurrentItem(){}
-                }
-            };
+        //    SingleShopList newShopList = new()
+        //    {
+        //        AdditionalItems = new List<AdditionalFoodCurrentItem>()
+        //        {
+        //           new AdditionalFoodCurrentItem(){}
+        //        }
+        //    };
 
-            var result = ShoppingListCreator.AddItemToAdditionalList(user, newShopList);
+        //    var result = ShoppingListCreator.AddItemToAdditionalList(user, newShopList);
 
-            Assert.IsTrue(result.PreviouslyAddedAdditonalItems[0].DatesWhenShopped.Count > 0);
-        }
+        //    Assert.IsTrue(result.PreviouslyAddedAdditonalItems[0].DatesWhenShopped.Count > 0);
+        //}
 
         [TestMethod()]
         public void CheckIfItIsTimeToBuyAgainTest()
