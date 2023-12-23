@@ -115,7 +115,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
                 }
             };
 
-            var result = ShoppingListCreator.AddDateToAdditionalItemLatestUse(user, newShopList);
+            var result = ShoppingListCreator.AddItemToAdditionalList(user, newShopList);
 
             Assert.IsTrue(result.PreviouslyAddedAdditonalItems[0].DatesWhenShopped.Count > 0);
 
@@ -137,7 +137,7 @@ namespace OrganizerApi.Cookbook.CookBookUtils.Tests
                 }
             };
 
-            var result = ShoppingListCreator.AddDateToAdditionalItemLatestUse(user, newShopList);
+            var result = ShoppingListCreator.AddItemToAdditionalList(user, newShopList);
 
             Assert.IsTrue(result.PreviouslyAddedAdditonalItems[0].DatesWhenShopped.Count > 0);
         }
